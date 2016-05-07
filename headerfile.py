@@ -19,6 +19,7 @@ list_codes = []
 with open(header_file) as f:
 	counter = 0
 	for line in f:
+		#print(counter)
 		l = line.split()
 		code = l[3][:5]
 		name_approx = line[195:220]
@@ -27,8 +28,12 @@ with open(header_file) as f:
 			for i in name_approx:
 				if not i.isdigit() and i != " ":
 					name.append(i)
+			name = "".join(name)
+			#print(counter)
 			list_codes.append([counter,name])
+		counter += 1
 
 with open("header_{}.csv".format(state),"w") as f:
 	writer = csv.writer(f)
-	writer.writerows(list_codes)
+	for place in list_codes:
+		writer.writerow(place)
