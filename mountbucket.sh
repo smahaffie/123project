@@ -8,7 +8,7 @@ cd s3fs-fuse-1.78
 make
 sudo make install
 cd
-echo "access-key-id:secret" > .passwd-s3fs
+echo "access-key-id:AKIAIJD4JSIVTYHHJ2BA" > .passwd-s3fs
 chmod 600 .passwd-s3fs 
 mkdir "project123bucket"
-s3fs "sshenker.spr16.cs123.uchicago.edu" "project123bucket"
+s3fs "cs123testbucket" "project123bucket"

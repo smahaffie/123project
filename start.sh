@@ -1,3 +1,4 @@
-ssh -i ~/cslab.pem ec2-user@ec2-$1.amazonaws.com
+scp -i csil.pem mountbucket.sh ec2-user@$1.amazonaws.com:~/
 
-mountbucket.sh
+
+ssh -i csil.pem ec2-user@$1.amazonaws.com

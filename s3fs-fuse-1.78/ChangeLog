@@ -1,0 +1,134 @@
+﻿ChangeLog for S3FS
+------------------
+
+Version 1.78 -- Sep 15, 2014
+issue #29 - Possible to create Debian/Ubuntu packages?(googlecode issue 109)
+issue 417(googlecode) - Password file with DOS format is not handled properly
+issue #41 - Failed making signature
+issue #40 - Moving a directory containing more than 1000 files truncates the
+directory
+issue #49 - use_sse is ignored when creating new files
+issue #39 - Support for SSE-C
+issue #50 - Cannot find pkg-config when configured with any SSL backend except
+openssl
+
+Version 1.77 -- Apr 19, 2014
+issue 405(googlecode) - enable_content_md5 Input/output error
+issue #14 - s3fs -u should return 0 if there are no lost multiparts
+issue #16 - empty file is written to s3
+issue #18 - s3fs crashes with segfault
+issue #22 - Fix typos in docs for max_stat_cache_size
+issue #23 - curl ssl problems
+issue #28 - Address signedness warning in FdCache::Init
+
+Version 1.76 -- Jan 21, 2014
+issue #5 - du shows incorrect usage stats
+issue #8 - version in configure.ac is 1.74 for release 1.75
+
+Version 1.75 -- Jan 6, 2014
+issue #1 - Using %20 instead of the plus (+) sign for encoding spaces
+issue #3 - Fixed local timezone was incorrectly being applied to IAM and Last-Modified dates.
+issue #4 - Fix compilation error on MacOSX with missing const
+
+Version 1.74 -- Nov 24, 2013
+This version is initial version on Github, same as on GoogleCodes(s3fs).
+https://github.com/s3fs-fuse/s3fs-fuse/releases/tag/v1.74
+see more detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.74.tar.gz
+
+Version 1.73 -- Aug 23, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.73.tar.gz
+
+Version 1.72 -- Aug 10, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.72.tar.gz
+
+Version 1.71 -- Jun 15, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.71.tar.gz
+
+Version 1.70 -- Jun 01, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.70.tar.gz
+
+Version 1.69 -- May 15, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.69.tar.gz
+
+Version 1.68 -- Apr 30, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.68.tar.gz
+
+Version 1.67 -- Apr 13, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.67.tar.gz
+
+Version 1.66 -- Apr 06, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.66.tar.gz
+
+Version 1.65 -- Mar 30, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.65.tar.gz
+
+Version 1.64 -- Mar 23, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.64.tar.gz
+
+Version 1.63 -- Feb 24, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.63.tar.gz
+
+Version 1.62 -- Jan 27, 2013
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.62.tar.gz
+
+Version 1.61 -- Aug 30, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.61.tar.gz
+
+Version 1.60 -- Aug 29, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.60.tar.gz
+
+Version 1.59 -- Jul 28, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.59.tar.gz
+
+Version 1.58 -- Jul 19, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.58.tar.gz
+
+Version 1.57 -- Jul 07, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.57.tar.gz
+
+Version 1.56 -- Jul 07, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.56.tar.gz
+
+Version 1.55 -- Jul 02, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.55.tar.gz
+
+Version 1.54 -- Jun 25, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.54.tar.gz
+
+Version 1.53 -- Jun 22, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.53.tar.gz
+
+Version 1.40 -- Feb 11, 2011
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.40.tar.gz
+
+Version 1.33 -- Dec 30, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.33.tar.gz
+
+Version 1.25 -- Dec 16, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.25.tar.gz
+
+Version 1.19 -- Dec 2, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.19.tar.gz
+
+Version 1.16 -- Nov 22, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.16.tar.gz
+
+Version 1.10 -- Nov 6, 2010 
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.10.tar.gz
+
+Version 1.02 -- Oct 29, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.02.tar.gz
+
+Version 1.01 -- Oct 28, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.01.tar.gz
+
+Version 1.0  -- Oct 24, 2010
+see detail on googlecodes: http://code.google.com/p/s3fs/downloads/detail?name=s3fs-1.0.tar.gz
+
+------
+Version 1.1 -- Mon Oct 18 2010
+Dan Moore reopens the project and fixes various issues that had accumulated in the tracker. Adrian Petrescu converts the project to autotools and posts it to GitHub.
+
+Version 1.0 -- 2008
+Randy Rizun releases a basic version of S3FS on Google Code.
+
