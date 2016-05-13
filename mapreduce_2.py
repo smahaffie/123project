@@ -1,6 +1,7 @@
 from mrjob.job import MRJob as mrj
 import csv
 from mrjob.step import MRStep
+import json
 
 def pop_data(line):
     '''
@@ -108,19 +109,22 @@ class make_vectors(mrj):
 
     def mapper_init(self):
         with open(self.options.index,'r') as f:
-            self.index_dict = json.loads(f)
-
+            self.index_dict = json.load(f)
+            #print(self.index_dict["AL"])
+            print(self.index_dict["AL"].keys())
 
     def mapper(self,num, line):
         line = line.split(",")
         state = line[1].lower()
         sum_file = line[0]
         index = str(int(line[4])-1) #indexing starts at 0
-        sub_file = line[3]
+        sub_file = int(line[3])
+        print(index)
 
-        if index in self.index_dict[state]:
+        if index in self.index_dict[state.upper()].keys():
+            print("x")
             if sum_file == "uSF1":
-                if int(sub_file) == 1 and float(line[5]) != 0:
+                if sub_file == 1 and (float(line[5]) != 0):
                         pop_d = pop_data(line)
                         pop = pop_d[0][1]
                         vect = pop_d[1:]
@@ -128,7 +132,7 @@ class make_vectors(mrj):
                             yield vect[i][0], (pop,vect[i][1])
 
             if sum_file == "uSF3":
-                if int(sub_file) == 2 and float(line[146]) != 0:
+                if sub_file == 2 and (float(line[146]) != 0):
                     lang_d = lang_data(line)
                     households = lang_d[0][1]
                     vect = lang_d[1:]
@@ -143,16 +147,17 @@ class make_vectors(mrj):
                     for i in range(len(vect)):
                         yield vect[i][0], (population,vect[i][1])
 
-                if int(sub_file) == 6 and float(line[146]) != 0:
-                    yield "hh_income", (float(line[65]),float(line[82])
+                if sub_file == 5:
+                  #if float(line[5])!= 0:
+                  emp_d = emp_data(line)
+                  pop = emp_d[0][1]
+                  vect = emp_d[1:]
+                  for i in range(len(vect)):
+                      yield vect[i][0], (pop,vect[i][1])
 
-                if int(sub_file) == 5 and float(line[5]) != 0:
-                    emp_d = emp_data(line)
-                    pop = emp_d[0][1]
-                    vect = emp_d[1:]
-                    for i in range(len(vect)):
-                        yield vect[i][0], (pop,vect[i][1])
-
+                if sub_file == 6 and (float(line[146]) != 0):
+                    print(line)
+                    yield "hh_income", (float(line[65]),float(line[82]))
 
     def combiner(self, field, V):
         '''
