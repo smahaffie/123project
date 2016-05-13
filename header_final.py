@@ -6,11 +6,12 @@ import json
 def find_index_places(file):
 	'''
 	Inputs:
-		state, string
-	Returns:
-		indexes, list
-		list_codes, list
+		file, string
+	Side effects:
+		writes a file where every row is a place and its index in all files within
+		the specific summary file
 	'''
+	
 	list_codes = []
 	indexes = []
 	state = file[:2]

@@ -3,15 +3,15 @@ import csv
 
 def create_json():
 	'''
-	Creates a json file containing the list of "places" for each state in the US
+	Creates a json file which has containing the list of "places" for each state in the US
+	and their corresponding indexes in each summary file
 	'''
-	'''
+
 	state_list = ["AK","AL","AZ","AR","CA","CO","CT","DE","FL",
 	"GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA",
 	"MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC",
 	"ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
-	"VA","WA","WV", "WI", "WY"]'''
-	state_list = ["AL"]
+	"VA","WA","WV", "WI", "WY"]
 
 	json_dict = {}
 	json_dict["uSF1"] = {}
