@@ -32,12 +32,12 @@ def lang_data(line):
     Returns:
         list of relevant data points
     '''
-    households = float(line[146])
-    pct_english = float(line[147])/households
-    pct_spanish = float(line[148])/households
-    pct_euro = float(line[151])/households
-    pct_asian = float(line[154])/households
-    pct_other = float(line[154])/households
+    households = float(line[157])
+    pct_english = float(line[158])/households
+    pct_spanish = float(line[159])/households
+    pct_euro = float(line[162])/households
+    pct_asian = float(line[165])/households
+    pct_other = float(line[168])/households
 
     return [    ("households",households),
                 ("pct_english",pct_english),
@@ -108,10 +108,9 @@ class make_vectors(mrj):
         self.add_file_option('--index')
 
     def mapper_init(self):
+
         with open(self.options.index,'r') as f:
             self.index_dict = json.load(f)
-            #print(self.index_dict["AL"])
-            print(self.index_dict["AL"].keys())
 
     def mapper(self,num, line):
         line = line.split(",")
@@ -119,10 +118,8 @@ class make_vectors(mrj):
         sum_file = line[0]
         index = str(int(line[4])-1) #indexing starts at 0
         sub_file = int(line[3])
-        print(index)
 
-        if index in self.index_dict[state.upper()].keys():
-            print("x")
+        if index in self.index_dict[sum_file][state.upper()]["indexes"]:
             if sum_file == "uSF1":
                 if sub_file == 1 and (float(line[5]) != 0):
                         pop_d = pop_data(line)
@@ -136,8 +133,7 @@ class make_vectors(mrj):
                     lang_d = lang_data(line)
                     households = lang_d[0][1]
                     vect = lang_d[1:]
-
-                    for i in range(len(lang_d)):
+                    for i in range(len(vect)):
                         yield vect[i][0], (households,vect[i][1])
 
                     foreign_d = foreign_data(line)
@@ -149,15 +145,16 @@ class make_vectors(mrj):
 
                 if sub_file == 5:
                   #if float(line[5])!= 0:
-                  emp_d = emp_data(line)
-                  pop = emp_d[0][1]
-                  vect = emp_d[1:]
-                  for i in range(len(vect)):
-                      yield vect[i][0], (pop,vect[i][1])
+                  if float(line[5]) != 0:
+                      emp_d = emp_data(line)
+                      pop = emp_d[0][1]
+                      vect = emp_d[1:]
+                      for i in range(len(vect)):
+                          yield vect[i][0], (pop,vect[i][1])
 
                 if sub_file == 6 and (float(line[146]) != 0):
-                    print(line)
-                    yield "hh_income", (float(line[65]),float(line[82]))
+                    #print(line)
+                    yield "hh_income", (float(line[70]),float(line[87]))
 
     def combiner(self, field, V):
         '''
@@ -190,6 +187,7 @@ class make_vectors(mrj):
         avg_ele = agg_v/tot_pop
 
         yield field, avg_ele
+    
 
 if __name__ == '__main__':
     make_vectors.run()
