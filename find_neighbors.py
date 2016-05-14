@@ -75,12 +75,52 @@ def dykstra(origin, epsilon):
     return G
 
 
+class springnode()
+
+    def __init__(self,lon,lat,neighbors):
+
+        x,y = flat_mapper(lon,lat)
+
+        pass
+
+    def next_xy(self):
+        '''
+        return next position
+        '''
+
 
 """
 
 ALL PAIRS shortest path
+    algorithm
+        gotta figure it out...
+        edges between neighboring nodes are their attr distances
+        returns shortest paths between all pairs of nodes
+        can construct homogenous area by filtering pairs by distance
+        
+        cheaper than running dykstra's for all places
 
-Spring thingy
+
+    social interpretation
+        i dunno
+
+
+Spring thing
+
+    algorithm
+        let each place be node and each edge a spring
+        let resting length of a spring be proportional to attr distance
+        Let physical location determine starting position 
+        project longitude, lattitute onto an xy plane
+        calculate how each node moves due to spring forces
+        iterate until system stablizes
+
+    social interpretation
+        places that are close in both physical and attr spaces will cluster
+        neighboring places with very different attributes will push apart
+        this deformed picture of usa will be indicative of self segregation
+        we should make a picture of the final state (or a gif of evolution)
+
 
 """
 
