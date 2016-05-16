@@ -2,6 +2,7 @@ import csv
 import math
 from mrjob.job import MRJob
 import heapq
+import sys
 
 AVGS = ''
 VARIABLES = ''
@@ -24,14 +25,11 @@ def setup_globals(avgs_file="sample_averages.csv",stds_file="sample_stds.csv",da
 class MRMostRepresentative(MRJob):
 
     def mapper(self, _, line):
-        print(line)
         if line[0] != 'p':
 
             num_vars = len(VARIABLES)
 
             place = line.split(",")[0]
-            print(place)
-            print(type(place))
             vect = line.split(",")[1:]
             assert len(vect) == num_vars
 
@@ -40,11 +38,15 @@ class MRMostRepresentative(MRJob):
                 if float(STDS[i]) != 0 and vect[i] != 'missing':
                     total_squared_std_dists += ((float(vect[i])-float(AVGS[i]))/float(STDS[i])) ** 2
 
-            yield place, -1 * math.sqrt(total_squared_std_dists)
+            assert most_or_least == "most" or most_or_least == "least"
+            if most_or_least == "most":
+                yield place, -1 * math.sqrt(total_squared_std_dists)
+            else:
+                yield place, math.sqrt(total_squared_std_dists)
 
     def reducer_init(self):
         self.h = []
-        for i in range(10):
+        for i in range(n):
             self.h.append((-99999999999,-9999999999))
         heapq.heapify(self.h)
 
@@ -66,5 +68,7 @@ class MRMostRepresentative(MRJob):
         
 
 if __name__ == '__main__':
+    n = int(sys.argv[2])
+    most_or_least = sys.argv[3]
     setup_globals()
     MRMostRepresentative.run()
