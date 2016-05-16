@@ -1,4 +1,4 @@
-# USAGE: python3 find_most_representative.py sample_data.csv n most_or_least
+# USAGE: python3 find_most_representative.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least
 # most_or_least should be "most" or "least"
 
 import csv
@@ -52,6 +52,7 @@ class MRMostRepresentative(MRJob):
         for i in range(n):
             self.h.append((-99999999999,-9999999999))
         heapq.heapify(self.h)
+        print(self.h)
 
     def reducer(self, place, dist):
         min_count, min_n = self.h[0]
@@ -71,7 +72,8 @@ class MRMostRepresentative(MRJob):
         
 
 if __name__ == '__main__':
-    n = int(sys.argv[2])
-    most_or_least = sys.argv[3]
+    n = int(sys.argv[4])
+    print(n)
+    most_or_least = sys.argv[5]
     setup_globals()
     MRMostRepresentative.run()
