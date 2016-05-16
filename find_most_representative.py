@@ -1,3 +1,6 @@
+# USAGE: python3 find_most_representative.py sample_data.csv n most_or_least
+# most_or_least should be "most" or "least"
+
 import csv
 import math
 from mrjob.job import MRJob
