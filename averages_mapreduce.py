@@ -2,7 +2,6 @@ from mrjob.job import MRJob as mrj
 import csv
 import json
 from mrjob.step import MRStep
-import math
 
 def pop_data(line):
     '''
@@ -87,11 +86,11 @@ def emp_data(line):
     '''
     Employment data, summing over male and female
     '''
-
     pop = float(line[5])
     pct_full_time = (float(line[8]) + float(line[30]))/pop
     pct_part_time = (float(line[15]) + float(line[22]) + float(line[37]) + float(line[44]))/pop
     pct_no_work = (float(line[29]) + float(line[51]))/pop
+    #assert (pct_full_time + pct_part_time + pct_no_work < 1)
 
     return [("population",pop),
         ("pct_full_time",pct_full_time),
@@ -99,29 +98,31 @@ def emp_data(line):
         ("pct_no_work",pct_no_work)
         ]
 
-class gen_vectors(mrj):
+class make_vectors(mrj):
     '''
-    construct vectors of containing relevant variables for every location
+    construct vectors of national averages for different measures
     '''
     def configure_options(self):
         '''
         pass additional file to map reduce job
         '''
-        super(gen_vectors,self).configure_options()
+        super(make_vectors,self).configure_options()
         self.add_file_option('--index')
 
     def mapper_init(self):
         '''
-        load json file with census places for every state
+        Load json dict that contains file line indexes for places by state
         '''
         with open(self.options.index,'r') as f:
             self.index_dict = json.load(f)
 
     def mapper(self,num, line):
         '''
-        yield key, value pairs
-            key = place,string
-            value = list of relevant variables from the given file
+        Creates a key, value pair for every variable of interest for every place
+        in every state
+        Key is a string equal to variable of interest (e.g. "pct_english")
+        Value is a tuple (relevant total, value)
+            e.g. (population of place,pct_englist)
         '''
         line = line.split(",")
         state = line[1]
@@ -135,81 +136,74 @@ class gen_vectors(mrj):
                         pop_d = pop_data(line)
                         pop = pop_d[0][1]
                         vect = pop_d[1:]
-                        yield place, ("population",pop)
                         for i in range(len(vect)):
-                            yield place,(vect[i][0], vect[i][1])
+                            yield vect[i][0], (pop,vect[i][1])
 
             if sum_file == "uSF3":
-                if sub_file == 2:
-                    if (float(line[171]) != 0):
-                        lang_d = lang_data(line)
-                        vect = lang_d[1:]
-                        for i in range(len(vect)):
-                            yield place,(vect[i][0], vect[i][1])
+                if sub_file == 2 and (float(line[171]) != 0):
+                    lang_d = lang_data(line)
+                    households = lang_d[0][1]
+                    vect = lang_d[1:]
 
-                        foreign_d = foreign_data(line)
-                        vect = foreign_d[1:]
+                    for i in range(len(vect)):
+                        yield vect[i][0], (households,vect[i][1])
 
-                        for i in range(len(vect)):
-                            yield place, (vect[i][0], vect[i][1])
+                    foreign_d = foreign_data(line)
+                    population = foreign_d[0][1]
+                    vect = foreign_d[1:]
+
+                    for i in range(len(vect)):
+                        yield vect[i][0], (population,vect[i][1])
 
                 if sub_file == 3 and float(line[161]) != 0:
                     ed_d = education_data(line)
+                    pop = ed_d[0][1]
                     vect2 = ed_d[1:]
                     for i in range(len(vect2)):
-                        yield place, (vect2[i][0], vect2[i][1])
+                        yield vect2[i][0], (pop,vect2[i][1])
 
                 if sub_file == 5:
                     if float(line[5]) != 0:
                         emp_d = emp_data(line)
                         vect = emp_d[1:]
+                        pop = emp_d[0][1]
                         for i in range(len(vect)):
-                            yield place, (vect[i][0],vect[i][1])
+                            yield vect[i][0],(pop,vect[i][1])
 
-                if sub_file == 6:
-                    if (float(line[146]) != 0):
-                        yield place, ("hh_income", float(line[87]))
+                if sub_file == 6 and (float(line[146]) != 0):
+                    yield "hh_income", (float(line[146]),float(line[87]))
 
-    def combiner(self, place, V):
+    def combiner(self, field, V):
         '''
-        combine data for all characteristics of each place
+        Find average on node for each field, weighting by total population or
+        number of households
         '''
-        yield place, list(V)
+        tot_pop = 0
+        agg_v = 0
+        v = list(V)
+        for pop, v_ele in v:
+            tot_pop += pop
+            agg_v += v_ele*pop
 
-    def reducer(self, place, V):
+        avg_ele = agg_v/tot_pop
+
+        yield field , (tot_pop, avg_ele)
+
+    def reducer(self, field, V):
         '''
-        Combine data for all characteristics of each place and write to file
+        Find average on node for each field, weighting by total population or
+        number of households
         '''
-        order1 = ["population","foreign","native","hh_income"]
-        order2 = ["pct_english","pct_asian_lang","pct_spanish"]
-        order3 =["pct_euro","pct_asian","pct_white","pct_black","pct_other"]
-        order4 = ["pct_hispanic","pct_full_time","pct_no_work"]
-        order5 = ["pct_part_time","pct_urban","less_than_hs","less_bachelors","doctorate"]
-        order = order1 + order2 + order3 + order4 + order5
 
-        v = list(V)[0]
-        dictionary = {}
-        list_string = []
-        fields = []
-        for field,value in v:
-            list_string.append(str(round(value,4)))
-            dictionary[field] = str(round(value,4))
-            fields.append(field)
-        '''
-        for field in order:
-            if field in dictionary.keys():
-                list_string.append(dictionary[field])
-            else:
-                list_string.append("missing")'''
+        tot_pop = 0
+        agg_v = 0
+        for pop, v_ele in list(V):
+            tot_pop += pop
+            agg_v += v_ele*pop
 
-        to_yield = ",".join(list_string)
-        field = ",".join(fields)
+        avg_ele = agg_v/tot_pop
 
-        place = place + ","
-
-        yield place,field
-        yield place, to_yield
-
+        yield field, round(avg_ele,2)
 
 if __name__ == '__main__':
-    gen_vectors.run()
+    make_vectors.run()
