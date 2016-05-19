@@ -173,6 +173,14 @@ class gen_vectors(mrj):
         '''
         yield place, list(V)
 
+    def reducer_init(self):
+        '''
+        create header row
+        '''
+        
+        yield " ", "population,foreign,native,hh_income,pct_english,pct_asian_lang,pct_spanish,pct_euro,pct_asian,pct_white,pct_black,pct_other,pct_hispanic,pct_full_time,pct_no_work,pct_part_time,pct_urban,less_than_hs,less_bachelors,doctorate"
+
+
     def reducer(self, place, V):
         '''
         Combine data for all characteristics of each place and write to file
@@ -182,6 +190,7 @@ class gen_vectors(mrj):
         order3 =["pct_euro","pct_asian","pct_white","pct_black","pct_other"]
         order4 = ["pct_hispanic","pct_full_time","pct_no_work"]
         order5 = ["pct_part_time","pct_urban","less_than_hs","less_bachelors","doctorate"]
+
         order = order1 + order2 + order3 + order4 + order5
 
         v = list(V)
