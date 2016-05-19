@@ -1,5 +1,7 @@
-# USAGE: python3 find_most_representative.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least
+# USAGE: python3 find_most_representative.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least vars_to_consider
 # most_or_least should be "most" or "least"
+# vars_to_consider: if you want all the variables in the input file, write "all". Otherwise, 
+# either put a tuple ("include", list of variable names to include) or ("don't include", list of variable names to ignore)
 
 import csv
 import math
@@ -8,16 +10,38 @@ import heapq
 import sys
 
 AVGS = ''
-VARIABLES = ''
+VARIABLES = {}
 STDS = ''
 
-def setup_globals(avgs_file="sample_averages.csv",stds_file="sample_stds.csv",data_file="sample_data.csv"):
+def setup_globals(avgs_file="../intermediate_data/sample_averages.csv",stds_file="../intermediate_data/sample_stds.csv",data_file="../intermediate_data/sample_data.csv"):
     with open(avgs_file,"r") as f:
+        all_variables = f.readline().strip().split(",")
         global VARIABLES
-        VARIABLES = f.readline().strip().split(",")
+        if desired_vars == "all":
+            VARIABLES = all_variables
+            var_indices = [i for i in range(len(all_variables))]
+
+        elif desired_vars[0] == 'include':
+            VARIABLES = []
+            i = 0
+            for var in all_variables:
+                if var in desired_vars[1]:
+                    VARIABLES.append(var)
+                    var_indices.append(i)
+                i += 1
+
+        elif desired_vars[0] == "don't include":
+            VARIABLES = []
+            for var in all_variables:
+                if var not in desired_vars[1]:
+                    VARIABLES.append(var)
+        else:
+            print("VARS TO CONSIDER WAS FORMATTED INCORRECTLY")
+
         global AVGS 
         AVGS = f.readline().strip().split(",")
         assert len(AVGS) == len(VARIABLES)
+
     with open(stds_file,"r") as f:
         check = f.readline().strip().split(",")
         assert check == VARIABLES
@@ -52,7 +76,6 @@ class MRMostRepresentative(MRJob):
         for i in range(n):
             self.h.append((-99999999999,-9999999999))
         heapq.heapify(self.h)
-        print(self.h)
 
     def reducer(self, place, dist):
         min_count, min_n = self.h[0]
@@ -73,7 +96,7 @@ class MRMostRepresentative(MRJob):
 
 if __name__ == '__main__':
     n = int(sys.argv[4])
-    print(n)
     most_or_least = sys.argv[5]
+    desired_vars = sys.argv[6]
     setup_globals()
     MRMostRepresentative.run()
