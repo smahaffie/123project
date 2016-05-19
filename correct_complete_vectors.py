@@ -207,7 +207,7 @@ class gen_vectors(mrj):
 
         place = place + ","
 
-        yield place,field
+        #yield place,field
         yield place, to_yield
 
 
