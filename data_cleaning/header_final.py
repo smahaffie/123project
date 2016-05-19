@@ -3,12 +3,9 @@ import re
 import sys
 import json
 
-def find_lonlat( weirdlist):
-
-	string = weirdlist[0] + weirdlist[1]
-
+def find_lonlat( line):
 	regex = "[\+,-][0-9]{8,11}"
-	res = re.findall(regex,string)
+	res = re.findall(regex,line)
 	if len(res) != 2:
 		print("lan lot fail")
 	try:
@@ -38,7 +35,7 @@ def find_index_places(file):
 		counter = 0
 		for line in f:
 			l = line.split()
-			lat, lon = find_lonlat(l[-2:])
+			lat, lon = find_lonlat(line)
 
 			code = l[3][:5]
 			sum_file = l[0]
