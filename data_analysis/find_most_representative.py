@@ -13,7 +13,7 @@ AVGS = ''
 VARIABLES = {}
 STDS = ''
 
-def setup_globals(avgs_file="sample_averages.csv",stds_file="sample_stds.csv",data_file="sample_data.csv"):
+def setup_globals(avgs_file="../intermediate_data/sample_averages.csv",stds_file="../intermediate_data/sample_stds.csv",data_file="../intermediate_data/sample_data.csv"):
     with open(avgs_file,"r") as f:
         all_variables = f.readline().strip().split(",")
         global VARIABLES
