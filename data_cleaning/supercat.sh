@@ -4,3 +4,9 @@ cp  /mnt/census/census_2000/datasets/Summary_File_3/*/*02_uf3.zip  ~/thepile
 cp  /mnt/census/census_2000/datasets/Summary_File_3/*/*03_uf3.zip  ~/thepile         
 cp  /mnt/census/census_2000/datasets/Summary_File_3/*/*05_uf3.zip  ~/thepile        
 cp  /mnt/census/census_2000/datasets/Summary_File_3/*/*06_uf3.zip  ~/thepile
+
+cd ~/thepile
+
+unzip *.zip
+
+cat *.u* > superfile.txt
