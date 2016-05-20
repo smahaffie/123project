@@ -10,5 +10,5 @@ sudo make install
 cd
 echo "access-key-id:AKIAIJD4JSIVTYHHJ2BA" > .passwd-s3fs
 chmod 600 .passwd-s3fs
-mkdir "~/project123bucket"
+mkdir ~/project123bucket
 s3fs "cs123testbucket" "~/project123bucket"
