@@ -1,4 +1,4 @@
-# USAGE: python3 find_most_representative.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least vars_to_consider
+# USAGE: python3 find_most_representative.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least vars_to_consider data_file avgs_file stds_file
 # most_or_least should be "most" or "least"
 # vars_to_consider: if you want all the variables in the input file, write "all". Otherwise, 
 # either put a tuple ("include", list of variable names to include) or ("don't include", list of variable names to ignore)
@@ -98,5 +98,8 @@ if __name__ == '__main__':
     n = int(sys.argv[4])
     most_or_least = sys.argv[5]
     desired_vars = sys.argv[6]
-    setup_globals()
+    data_file = sys.argv[7]
+    avgs_file = sys.argv[8]
+    stds_file = sys.argv[9]
+    setup_globals(avgs_file, stds_file, data_file)
     MRMostRepresentative.run()
