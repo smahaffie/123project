@@ -1,8 +1,12 @@
 from mrjob.job import MRJob as mrj
 import csv
 import json
-from mrjob.step import MRStep
-import math
+
+'''
+MapReduce code to generate vectors for every "place" in the US
+Generates vectors with the name of the place, latitude, longtitude,
+and data on race,employment,education,language etc.
+'''
 
 def pop_data(line):
     '''
@@ -49,6 +53,10 @@ def lang_data(line):
                        ]
 
 def foreign_data(line):
+    '''
+    tabulates foreign data on a place
+    '''
+    
     population = float(line[171])
     native = float(line[172])/population
     foreign = float(line[183])/population
