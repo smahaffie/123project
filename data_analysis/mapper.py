@@ -1,8 +1,3 @@
-Python 3.5.1 (v3.5.1:37a07cee5969, Dec  5 2015, 21:12:44) 
-[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
-Type "copyright", "credits" or "license()" for more information.
->>> WARNING: The version of Tcl/Tk (8.5.9) in use may be unstable.
-Visit http://www.python.org/download/mac/tcltk/ for current information.
 from mrjob.job import MRJob as mrj
 import csv
 from mrjob.step import MRStep
@@ -36,25 +31,25 @@ def lang_data(line):
     Returns:
         list of relevant data points
     '''
-    households = float(line[146])
-    pct_english = float(line[147])/households
-    pct_spanish = float(line[148])/households
-    pct_euro = float(line[151])/households
-    pct_asian = float(line[154])/households
-    pct_other = float(line[154])/households
+    households = float(line[157])
+    pct_english = float(line[158])/households
+    pct_spanish = float(line[159])/households
+    pct_euro = float(line[162])/households
+    pct_asian = float(line[165])/households
+    pct_other = float(line[168])/households
 
     return [    ("households",households),
                 ("pct_english",pct_english),
                 ("pct_spanish",pct_spanish),
                 ("pct_euro",pct_euro),
-                ("pct_asian",pct_asian),
+                ("pct_asian_lang",pct_asian),
                 ("pct_other",pct_other)
                        ]
 
 def foreign_data(line):
-    population = float(line[161])
-    native = float(line[162])/population
-    foreign = float(line[163])/population
+    population = float(line[171])
+    native = float(line[172])/population
+    foreign = float(line[183])/population
     return [("population",population),
             ("native",native),
             ("foreign",foreign)]
@@ -64,19 +59,21 @@ def education_data(line):
     educational attainment data for a place, summing over males and females
     '''
 
-    population = float(line[161])
+    population = float(line[-35])
     less_than_hs = 0
 
-    for i in range(209,216):
+    for i in range(213,220):
         less_than_hs += float(line[i])
-    for i in range(225,233):
+    for i in range(230,237):
         less_than_hs += float(line[i])
 
-    hs = float(line[216]) + float(line[233])
-    less_bachelors = (float(line[217]) + float(line[218]) + float(line[219])
-    + float(line[234]) + float(line[235]) + float(line[236]))
-    bachelors = float(line[220]) + float(line[237])
-    doctorate = float(line[223]) + float(line[240])
+    less_than_hs = less_than_hs/population
+
+    hs = float(line[220]) + float(line[237])/population
+    less_bachelors = (float(line[221]) + float(line[222]) + float(line[223])
+    + float(line[238]) + float(line[239]) + float(line[240]))/population
+    bachelors = (float(line[224]) + float(line[241]))/population
+    doctorate = (float(line[228]) + float(line[245]))/population
 
     return [("population",population),
             ("less_than_hs",less_than_hs),
@@ -88,11 +85,11 @@ def emp_data(line):
     '''
     Employment data, summing over male and female
     '''
-
     pop = float(line[5])
-    pct_full_time = (float(line[8]) + float(line[32]))/pop
-    pct_part_time = (float(line[15]) + float(line[22]) + float(line[39]) + float(line[46]))/pop
-    pct_no_work = (float(line[29]) + float(line[53]))/pop
+    pct_full_time = (float(line[8]) + float(line[28]))/pop
+    pct_part_time = (float(line[15]) + float(line[22]) + float(line[35]) + float(line[42]))/pop
+    pct_no_work = (float(line[29]) + float(line[47]))/pop
+    assert (pct_full_time + pct_part_time + pct_no_work < 1)
 
     return [("population",pop),
         ("pct_full_time",pct_full_time),
@@ -128,6 +125,7 @@ class make_vectors(mrj):
                         pop_d = pop_data(line)
                         pop = pop_d[0][1]
                         vect = pop_d[1:]
+                        yield "population",pop
                         for i in range(len(vect)):
                             yield vect[i][0], (pop,vect[i][1])
 
