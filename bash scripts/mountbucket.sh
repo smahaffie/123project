@@ -1,4 +1,3 @@
-sudo yum -y install git-all
 sudo yum -y groupinstall "Development Tools"
 sudo yum -y install fuse fuse-devel autoconf automake curl-devel libxml2-devel openssl-devel mailcap
 wget https://github.com/s3fs-fuse/s3fs-fuse/archive/v1.78.tar.gz
