@@ -64,5 +64,5 @@ if __name__=="__main__":
 		"MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC",
 		"ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
 		"VA","WA","WV", "WI", "WY"]:
-		find_index_places("{}geo.uf1".format(state.lower),state)
-		find_index_places("{}geo.uf3".format(state.lower),state)
+		find_index_places("{}geo.uf1".format(state.lower()),state)
+		find_index_places("{}geo.uf3".format(state.lower()),state)
