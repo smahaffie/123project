@@ -32,7 +32,12 @@ def generate_pairs(line,index,vectors,N):
     for n in range(index+1, N):
         p = vectors[n]
         pname,plon,plat = p[1:4]
-        if haversine(float(lon),float(lat),float(plon),float(plat))<96:
+        distance = 100
+        try:
+            distance = haversine(float(lon),float(lat),float(plon),float(plat))
+        except:
+            print(p)
+        if distance<96:
             pairs.append(pname)
     return pairs
 
