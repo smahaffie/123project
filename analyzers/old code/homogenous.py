@@ -42,7 +42,7 @@ def dykstra(origin, epsilon,neighbor_dict,vectors):
         a_n     =  active_nodes.pop()   # active node
 
         for n in neighbor_dict[a_n]:
-            d = difference(n, origin,vectors)**4    # increase cost of extra distance
+            d = difference(n, origin,vectors)**2    # increase cost of extra distance
             this_path = G.node[a_n]['shortest_path'] + d
 
             if this_path < epsilon:
