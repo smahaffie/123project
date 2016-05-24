@@ -72,4 +72,5 @@ class gen_vectors(mrj):
         print('map done')
 
 if __name__ == "__main__":
+    print('go')
     gen_vectors.run()
