@@ -1,15 +1,17 @@
 import os
+import sys
 
-VECTORS = "supervectors.txt"
 PEM = "~/laptop.pem"
 
+PLACENAMEFILE = "placenames.txt"
 
-def gen_places( n ):
+
+def gen_places( n , file):
     """
     breaks up vectors into n pieces
     stolen from lecture code
     """
-    f = open(VECTORS,'r')
+    f = open( file ,'r')
 
     f.seek(0,2) #go to end of file
     fsize = f.tell()
@@ -29,24 +31,36 @@ def go(ip_list):
     generate and run commands for many aws instances
     to run homogenous.py in parallel
     """
-    ranges = gen_places(len(ip_list))
+    ranges = gen_places(len(ip_list), PLACENAMEFILE)
 
-    for ip, start, stop in zip(ip_list, ranges):
+    for ip, r in zip(ip_list, ranges):
 
-        os.system('scp -i %s %s ec2-user@%s.amazonaws.com:~/ '%
-                    [PEM, VECTORS, ip] )    # copy vectors 
+        start,stop = r
 
-        os.system('scp -i %s %s ec2-user@%s.amazonaws.com:~/ '%
-                [PEM,"homogenous.py",ip])   # copy our function
+        files_to_copy = ("json_vectors.json","homogenous.py","placenames.txt")
 
-        runner = "python homogenous.py %s %s"%(start,stop)
+        for ftc in files_to_copy:
+            os.system('scp -i %s %s ec2-user@%s.amazonaws.com:~/ '%
+                        [PEM, ftc, ip] )
+
+
+        runner = ("python homogenous.py %s %s %s %s"%
+                ("neighbors.json","json_vectors.json",start,stop))
 
         os.system( 'ssh -i %s ec2-user@%s.amazonaws.com "%s" &'%
                     [PEM,ip, runner])       # run dykstra's algorithm
 
 
+def retrieve(ip_list):
+    """
+    copy outputs back to this computer
+    """
+    n = 0
+
+    os.system("mkdir dykstra_ress")
+
+    for ip in ip_list:
+        os.system("scp -i %s %s:~/dykstra_res.txt /dykstra_ress"%
+                    (PEM,ip)    )
 
 
-if __name__ == "__main__":
-
-    go(sys.argv)
