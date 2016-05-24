@@ -4,12 +4,8 @@ import sys
 import json
 
 def find_lonlat( line):
-<<<<<<< HEAD
-
 	regex = "[\+,-][0-9]{8}"
-=======
 	regex = "[\+,-][0-9]{8,11}"
->>>>>>> 1f7509587c1598c7ba37cb5d39afa66cc9d2d950
 	res = re.findall(regex,line)
 	if len(res) != 2:
 		print("lan lot fail")
@@ -17,10 +13,10 @@ def find_lonlat( line):
 		lat = res[0][:3] + '.' + res[0][3:]
 		lon = res[1][:4] + '.' + res[1][4:]
 	except:
-		print(res)
-		print(string)
-	lat = res[0][:3] + '.' + res[0][3:]
-	lon = res[1][:4] + '.' + res[1][4:]
+		#print(res)
+		#print(string)
+		lat = res[0][:3] + '.' + res[0][3:]
+		lon = res[1][:4] + '.' + res[1][4:]
 
 	return float(lat),float(lon)
 
@@ -36,7 +32,7 @@ def find_index_places(file,state):
 	list_codes = []
 	indexes = []
 	#state = file[:2]
-	print(state)
+	#print(state)
 	with open(file) as f:
 		counter = 0
 		for line in f:
