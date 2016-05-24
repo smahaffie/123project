@@ -37,6 +37,7 @@ def generate_pairs(line,index,vectors,N):
     return pairs
 
 
+
 class gen_vectors(mrj):
     '''
     construct vectors of containing relevant variables for every location
@@ -52,28 +53,20 @@ class gen_vectors(mrj):
         '''
         load json file with census places for every state
         '''
-        print('init start')
         self.vectors = []
         with open(self.options.vectors,'r') as f:
             reader = csv.reader(f)
             for row in reader:
                 self.vectors.append(row)
         self.N = len(self.vectors)
-        print('init done')
 
     def mapper(self,_,line):
-        print('map start')
         line = line.split(",")
-        index = line[0]
-        if index !='place':
-
-            index = int(index)
-            place = line[1]
-            pairs = generate_pairs(line,index,self.vectors,self.N)
-            for p in pairs:
-                yield place,p
-            print('map done')
+        index = int(line[0])
+        place = line[1]
+        pairs = generate_pairs(line,index,self.vectors,self.N)
+        for p in pairs:
+            yield place,p
 
 if __name__ == "__main__":
-    print('go')
     gen_vectors.run()
