@@ -1,8 +1,7 @@
 from mrjob.job import MRJob as mrj
 import csv
 import json
-from math import radians, cos, sin, asin, sqrt
-
+import networkx as nx
 
 
 
@@ -20,7 +19,7 @@ class make_graph(mrj):
         self.add_file_option('--neighbors')
         self.add_file_option('--epsilon')
 
-    def difference(a,b,vectors):
+    def difference(self,a,b):
         '''
         finds difference between two places
         if data is missing we ignore that dimension
@@ -39,7 +38,7 @@ class make_graph(mrj):
 
         return (tot/n)**.5
 
-    def dykstra(origin):
+    def dykstra(self,origin):
         """
         Uses dykstra's algorithm to find shortest path to neighboring nodes
         returns subgraph of usa such that neighbors are within epsilon of origin 
@@ -51,8 +50,8 @@ class make_graph(mrj):
         while len(active_nodes) > 0:
             a_n     =  active_nodes.pop()   # active node
 
-            for n in self.neighbors[a_n]:
-                d = difference(n, origin)**2    # increase cost of extra distance
+            for n in self.neighbors.get(a_n,[]):    #catch no neighbor exception
+                d = self.difference(n, origin)**4    # increase cost of extra distance
                 this_path = G.node[a_n]['shortest_path'] + d
 
                 if this_path < self.epsilon:
@@ -67,22 +66,33 @@ class make_graph(mrj):
                     active_nodes.append(n)            # add new active node
         return G
 
-
-
     def mapper_init(self):
         '''
         load json file with census places for every state
         '''
         self.vectors = json.load(open(self.options.vectors))
         self.neighbors = json.load(open(self.options.neighbors))
-        self.epsilon = self.options.epsilon
+        self.epsilon = float(self.options.epsilon)
 
     def mapper(self,_,line):
-        
-        G = dykstra(line)
 
-        yield G.nodes
+        G = self.dykstra(line)
+        yield line, ','.join(G.nodes())
+
 
 
 if __name__ == "__main__":
     make_graph.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
