@@ -34,7 +34,6 @@ def generate_pairs(line,index,vectors,N):
         pname,plon,plat = p[1:4]
         if haversine(float(lon),float(lat),float(plon),float(plat))<96:
             pairs.append(pname)
-
     return pairs
 
 
