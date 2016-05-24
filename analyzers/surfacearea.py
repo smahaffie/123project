@@ -2,7 +2,7 @@ from mrjob.job import MRJob as mrj
 import json
 from scipy.spatial import ConvexHull
 
-
+ 
 
 
 """
