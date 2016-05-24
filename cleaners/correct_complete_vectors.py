@@ -37,7 +37,7 @@ def lang_data(line):
     Returns:
         list of relevant data points
     '''
-    households = float(line[157])
+    households = max(float(line[157]),1)
     pct_english = float(line[158])/households
     pct_spanish = float(line[159])/households
     pct_euro = float(line[162])/households
@@ -56,7 +56,7 @@ def foreign_data(line):
     '''
     tabulates foreign data on a place
     '''
-    
+
     population = float(line[171])
     native = float(line[172])/population
     foreign = float(line[183])/population
@@ -132,12 +132,12 @@ class gen_vectors(mrj):
             value = list of relevant variables from the given file
         '''
         line = line.split(",")
-        state = line[1]
+        state = line[1].upper()
         sum_file = line[0]
         index = str(int(line[4])-1) #indexing starts at 0
         sub_file = int(line[3])
-        if index in self.index_dict[sum_file][state.upper()]["indexes"]:
-            place = self.index_dict[sum_file][state.upper()]["tuples"][index][0]
+        if str(index) in self.index_dict[sum_file][state]["indexes"]:
+            place = self.index_dict[sum_file][state]["tuples"][index][0]
             lat = self.index_dict[sum_file][state.upper()]["tuples"][index][1]
             lon = self.index_dict[sum_file][state.upper()]["tuples"][index][2]
             if sum_file == "uSF1":
@@ -181,6 +181,7 @@ class gen_vectors(mrj):
         '''
         combine data for all characteristics of each place
         '''
+        #print(place)
         yield place, list(V)
 
     def reducer_init(self):
@@ -226,7 +227,7 @@ class gen_vectors(mrj):
 
         place = list(place)
         p = ",".join(place) + ","
-
+        #print(p)
 
         yield p, to_yield
 

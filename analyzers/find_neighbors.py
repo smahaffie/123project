@@ -7,11 +7,6 @@ import itertools
 #ADJACENCY  = "county_adjacency.txt"
 
 
-"""
-
-
-"""
-
 def place_lon_lat_genearator(js_vectors):
 
     """

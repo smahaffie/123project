@@ -4,12 +4,8 @@ import sys
 import json
 
 def find_lonlat( line):
-<<<<<<< HEAD
-
 	regex = "[\+,-][0-9]{8}"
-=======
 	regex = "[\+,-][0-9]{8,11}"
->>>>>>> 1f7509587c1598c7ba37cb5d39afa66cc9d2d950
 	res = re.findall(regex,line)
 	if len(res) != 2:
 		print("lan lot fail")
@@ -17,10 +13,10 @@ def find_lonlat( line):
 		lat = res[0][:3] + '.' + res[0][3:]
 		lon = res[1][:4] + '.' + res[1][4:]
 	except:
-		print(res)
-		print(string)
-	lat = res[0][:3] + '.' + res[0][3:]
-	lon = res[1][:4] + '.' + res[1][4:]
+		#print(res)
+		#print(string)
+		lat = res[0][:3] + '.' + res[0][3:]
+		lon = res[1][:4] + '.' + res[1][4:]
 
 	return float(lat),float(lon)
 
@@ -36,7 +32,7 @@ def find_index_places(file,state):
 	list_codes = []
 	indexes = []
 	#state = file[:2]
-	print(state)
+	#print(state)
 	with open(file) as f:
 		counter = 0
 		for line in f:
@@ -63,4 +59,10 @@ def find_index_places(file,state):
 
 
 if __name__=="__main__":
-	find_index_places(sys.argv[1],sys.argv[2])
+	for state in ["AK","AL","AZ","AR","CA","CO","CT","DE","FL",
+		"GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA",
+		"MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC",
+		"ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
+		"VA","WA","WV", "WI", "WY"]:
+		find_index_places("{}geo.uf1".format(state.lower()),state)
+		find_index_places("{}geo.uf3".format(state.lower()),state)
