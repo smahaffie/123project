@@ -2,12 +2,6 @@ from mrjob.job import MRJob as mrj
 import json
 from scipy.spatial import ConvexHull
 
- 
-
-
-"""
-input, 
-"""
 
 class make_graph(mrj):
     '''
@@ -20,28 +14,46 @@ class make_graph(mrj):
         '''
         super(make_graph,self).configure_options()
         self.add_file_option('--vectors')
-        self.add_file_option('--neighbors')
 
 
     def get_xy(self,place):
 
-        lon,lat = self.vectors[:1]
 
-        # need lon lat to x,y
+        placeinfo = self.vectors.get(place,None)
+
+        if placeinfo == None:
+            return None
+
+        lon,lat = placeinfo[:2]
+        # treat lon lat as x,y
+
+        return (float(lon),float(lat))
 
     def mapper_init(self):
         '''
         load json file with census places for every state
         '''
         self.vectors = json.load(open(self.options.vectors))
-        self.neighbors = json.load(open(self.options.neighbors))
 
     def mapper(self,_,line):
 
         centre, nodes = line.split('\t')
-        points = [get_xy(n) for n in nodes.split(',')]
+
+        centre = centre.replace('"','')
+        nodes = nodes.replace('"','')
+        points=[]
+        for n in nodes.split(','):
+
+            xy = self.get_xy(n)
+            if xy == None:
+                continue 
+            points.append(xy)
+
+        if len(points)==0:
+            return
         hull = ConvexHull(points)
         area  = hull.volume
+        yield centre, area
 
 
 
