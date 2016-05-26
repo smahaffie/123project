@@ -1,5 +1,6 @@
 import csv
 import re
+import sys
 import math
 
 def create_summary_files(raw_file, data_file, avgs_file, stds_file):
@@ -55,6 +56,8 @@ def create_summary_files(raw_file, data_file, avgs_file, stds_file):
             f.write(places[i] + "," + ",".join(line) + "\n")
             i += 1
 
+if __name__ == "__main__":
+    create_summary_files(sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
 
             
 
