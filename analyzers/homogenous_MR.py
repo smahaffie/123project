@@ -78,30 +78,28 @@ class make_graph(mrj):
 
         G = self.dykstra(line)
 
-        output = []
+        selfv = self.vectors.get(line,None)
+        if selfv == None:
+            pass
 
-        for n in G.nodes():
-            v = self.vectors.get(n,None)
-            if v == None:
-                continue
-            lon,lat = v[:2]
-            output.append((n,lon,lat)) 
+        else:
+            slon,slat = selfv[:2]
 
-        yield line, output
+            output = []
+            for n in G.nodes():
+                v = self.vectors.get(n,None)
+                if v == None:
+                    continue
+                lon,lat = v[:2]
+                output.append((n,lon,lat)) 
+
+
+            yield (line,slon,slat), output
 
 
 
 if __name__ == "__main__":
     make_graph.run()
-
-
-
-
-
-
-
-
-
 
 
 

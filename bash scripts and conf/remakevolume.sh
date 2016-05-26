@@ -1,7 +1,9 @@
 
 mkdir /mnt/volume/zipped
 mkdir /mnt/volume/unzipped
-echo "made zipped, unzipped"
+mkdir /mnt/volume/zippedgeo
+mkdir /mnt/volume/unzippedgeo
+echo "made zipped, unzipped, zippedgeo"
 
 echo "copying summary files"
 cp  /mnt/census/census_2000/datasets/Summary_File_1/*/*01_uf1.zip  /mnt/volume/zipped  
@@ -15,15 +17,33 @@ echo "done table 5"
 cp  /mnt/census/census_2000/datasets/Summary_File_3/*/*06_uf3.zip  /mnt/volume/zipped
 echo "done table 6"
 
-rm /mnt/volume/unzipped/pr*
-rm /mnt/volume/unzipped/us*
-rm /mnt/volume/unzipped/dc*
+cp /mnt/census/census_2000/datasets/Summary_File_1/*/*geo* /mnt/volume/zippedgeo
+cp /mnt/census/census_2000/datasets/Summary_File_3/*/*geo* /mnt/volume/zippedgeo
+echo "copied geo files"
+
+rm /mnt/volume/zip*/pr*
+rm /mnt/volume/zip*/us*
+rm /mnt/volume/zip*/dc*
 echo "removed PR, US, DC"
 
-unzip "/mnt/volume/zipped/*.zip" -d /mnt/123/unzipped
+unzip "/mnt/volume/zipped/*" -d /mnt/volume/unzipped
+unzip "/mnt/volume/zippedgeo/*" -d /mnt/unzippedgeo
 echo "unzipped everything"
 
-cat /mnt/volume/unzipped/*geo* > /mnt/123/supergeo.txt
-echo " super geo made"
-cat /mnt/volume/unzipped/*0*.u* > ~/mnt/123/superfile.txt
-echo "makde superfile"
+cd /mnt/volume/unzippedgeo
+python /home/ec2-user/123project/cleaners/header_with_lon_lat.py
+echo "made csvs from geos"
+
+python /home/ec2-user/123project/correct_make_json.py
+mv new_json_dict.json ..
+echo "made json dict"
+
+cat /mnt/volume/unzipped/*0*.u* > /mnt/volume/superfile.txt
+echo "made superfile"
+
+python /home/ec2-user/123project/cleaners/correct_complete_vectors.py \
+    -r emr /mnt/volume/superfile --index=new_json_dict
+
+
+
+
