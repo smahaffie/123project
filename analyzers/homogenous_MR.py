@@ -77,7 +77,17 @@ class make_graph(mrj):
     def mapper(self,_,line):
 
         G = self.dykstra(line)
-        yield line, ','.join(G.nodes())
+
+        output = []
+
+        for n in G.nodes():
+            v = self.vectors.get(n,None)
+            if v == None:
+                continue
+            lon,lat = v[:2]
+            output.append((n,lon,lat)) 
+
+        yield line, output
 
 
 
