@@ -11,7 +11,7 @@ AVGS = ''
 VARIABLES = ''
 STDS = ''
 
-def setup_globals(avgs_file="../intermediate_data/sample_averages.csv",stds_file="../intermediate_data/sample_stds.csv",data_file="../intermediate_data/sample_data.csv"):
+def setup_globals(avgs_file="../intermediate_data/alabama_avgs.csv",stds_file="../intermediate_data/alabama_stds.csv",data_file="../intermediate_data/alabama_data.csv"):
     with open(avgs_file,"r") as f:
         global VARIABLES
         VARIABLES = f.readline().strip().split(",")
@@ -32,8 +32,8 @@ class MRMostRepresentative(MRJob):
 
             num_vars = len(VARIABLES)
 
-            place = line.split(",")[0]
-            vect = line.split(",")[1:]
+            place = ",".join(line.split(",")[0:3])
+            vect = line.split(",")[3:]
             assert len(vect) == num_vars
 
             total_squared_std_dists = 0
@@ -76,4 +76,5 @@ if __name__ == '__main__':
     print(n)
     most_or_least = sys.argv[5]
     setup_globals()
+    print("set up globals")
     MRMostRepresentative.run()
