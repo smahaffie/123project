@@ -1,4 +1,4 @@
-# USAGE: python3 find_most_representative.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least
+# USAGE: python3 find_most_representative_simple.py --jobconf mapreduce.job.reduces=1 sample_data.csv n most_or_least
 # most_or_least should be "most" or "least"
 
 import csv
