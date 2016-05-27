@@ -75,7 +75,6 @@ class make_graph(mrj):
         self.epsilon = float(self.options.epsilon)
 
     def mapper(self,_,line):
-
         G = self.dykstra(line)
 
         selfv = self.vectors.get(line,None)
@@ -91,12 +90,14 @@ class make_graph(mrj):
                 if v == None:
                     continue
                 lon,lat = v[:2]
-                output.append((n,lon,lat)) 
+                yield (line,slon,slat) , (n,lon,lat)
 
 
-            yield (line,slon,slat), output
-
-
+    def reducer(self,place,nodes):
+        res = ','.join(place) + '|'
+        for n in list(nodes):
+            res += ','.join(n) + ';'
+        yield res, None
 
 if __name__ == "__main__":
     make_graph.run()
