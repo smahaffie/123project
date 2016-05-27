@@ -42,7 +42,7 @@ def find_index_places(file,state):
 			code = l[3][:5]
 			sum_file = l[0]
 			name_approx = line[195:220]
-			if l[1][2:5] == "158":
+			if l[1][2:5] == "140":
 				name = []
 				for i in name_approx:
 					if not i.isdigit() and i != " ":
