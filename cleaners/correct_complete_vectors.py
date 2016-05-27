@@ -127,6 +127,8 @@ class gen_vectors(mrj):
 
     def mapper(self,num, line):
         '''
+        Use columns in the line that indicate which summary file and subfile and state
+        the row refers to in order to map a key,value pair with the relevant variables
         yield key, value pairs
             key = place,string
             value = list of relevant variables from the given file
@@ -181,7 +183,6 @@ class gen_vectors(mrj):
         '''
         combine data for all characteristics of each place
         '''
-        #print(place)
         yield place, list(V)
 
     def reducer_init(self):
@@ -214,11 +215,15 @@ class gen_vectors(mrj):
         list_string = []
         fields = []
 
+        all_zeros = True
+
         for field,value in list_tups:
             dictionary[field] = str(round(value,4))
 
         for field in order:
             if field in dictionary.keys():
+                if field != 0:
+                    all_zeros = False
                 list_string.append(dictionary[field])
             else:
                 list_string.append("missing")
@@ -227,9 +232,8 @@ class gen_vectors(mrj):
 
         place = list(place)
         p = ",".join(place) + ","
-        #print(p)
-
-        yield p, to_yield
+        if all_zeros==False:
+            yield p, to_yield
 
 
 if __name__ == '__main__':
