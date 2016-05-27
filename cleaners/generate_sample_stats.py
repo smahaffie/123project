@@ -57,7 +57,7 @@ def create_summary_files(raw_file, data_file, avgs_file, stds_file):
             i += 1
 
 if __name__ == "__main__":
-    create_summary_files(sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+    create_summary_files(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
             
 
