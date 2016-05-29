@@ -4,15 +4,13 @@ import json
 from mrjob.step import MRStep
 import re
 from math import radians, cos, sin, asin, sqrt
+import networkx as nx
 
 '''
 MapReduce code to generate vectors for every "place" in the US
 Generates vectors with the name of the place, latitude, longtitude,
 and data on race,employment,education,language etc.
 '''
-
-VECTORS = []
-COUNTER = 0
 
 def pop_data(line):
     '''
@@ -166,6 +164,8 @@ class mr_master(mrj):
         super(mr_master,self).configure_options()
         self.add_file_option('--index')
 
+        self.add_file_option('--epsilon')
+
     def mapper_init_create_vectors(self):
         '''
         load json file with census places for every state
@@ -294,6 +294,25 @@ class mr_master(mrj):
             for p in pairs:
                 yield place,p
 
+    def reducer_pairs(self,place,p):
+        '''
+        global PAIRS
+        PAIRS.append([place,p])
+        '''
+        for place2 in p:
+            PAIRS.append([place,place2])
+            yield place, place2
+
+    def reducer_final_pairs(self):
+        global NEIGHBORDICT
+        for pair in PAIRS:
+            place, neighbor = pair
+            #print("PAIR",place,neighbor)
+            neighbors = NEIGHBORDICT.get(place,[])
+            neighbors.append(neighbor)
+            NEIGHBORDICT[place] = neighbors
+        print(NEIGHBORDICT)
+
     def steps(self):
         return [
             MRStep(mapper_init=self.mapper_init_create_vectors,
@@ -301,9 +320,16 @@ class mr_master(mrj):
                     combiner=self.combiner_create_vectors,
                     reducer_init=self.reducer_init_create_vectors,
                     reducer=self.reducer_create_vectors),
-            MRStep(mapper=self.mapper_pairs)
+            MRStep(mapper=self.mapper_pairs,
+                    reducer=self.reducer_pairs,
+                    reducer_final=self.reducer_final_pairs)
         ]
 
 
 if __name__ == '__main__':
+    VECTORS = []
+    COUNTER = 0
+    PAIRS = []
+    NEIGHBORDICT = {}
+
     mr_master.run()
