@@ -68,11 +68,12 @@ class gen_vectors(mrj):
 
     def mapper(self,_,line):
         line = line.split(",")
-        index = int(line[0])
-        place = line[1]
-        pairs = generate_pairs(line,index,self.vectors,self.N)
-        for p in pairs:
-            yield place,p
+        if line[0]!='place'
+            index = int(line[0])
+            place = line[1]
+            pairs = generate_pairs(line,index,self.vectors,self.N)
+            for p in pairs:
+                yield place,p
 
 if __name__ == "__main__":
     gen_vectors.run()

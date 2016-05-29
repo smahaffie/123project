@@ -1,6 +1,7 @@
 from mrjob.job import MRJob as mrj
 import json
 from scipy.spatial import ConvexHull
+import heapq
 
 
 class make_graph(mrj):
@@ -10,51 +11,62 @@ class make_graph(mrj):
 
     def configure_options(self):
         '''
-        pass additional file to map reduce job
+        pass additional arg to map reduce job
         '''
         super(make_graph,self).configure_options()
-        self.add_file_option('--vectors')
-
-
-    def get_xy(self,place):
-
-
-        placeinfo = self.vectors.get(place,None)
-
-        if placeinfo == None:
-            return None
-
-        lon,lat = placeinfo[:2]
-        # treat lon lat as x,y
-
-        return (float(lon),float(lat))
-
-    def mapper_init(self):
-        '''
-        load json file with census places for every state
-        '''
-        self.vectors = json.load(open(self.options.vectors))
+        self.add_file_option('--n')
 
     def mapper(self,_,line):
+        """
+        takes in a line, seperate centre of homeogenous area
+        from all the nodes, then makes hull of points to proxy for area
+        """
+        line = line.strip('\tnull\n').replace('"','')
+        centre, nodes = line.split('|')
 
-        centre, nodes = line.split('\t')
+        cname, clon, clat = centre.split(',')
 
-        centre = centre.replace('"','')
-        nodes = nodes.replace('"','')
-        points=[]
-        for n in nodes.split(','):
+        points = []
+        for n in nodes.split(';'):
+            if n == '':
+                continue
+            nname, nlon, nlat = n.split(',')
+            points.append((nlon,nlat))
 
-            xy = self.get_xy(n)
-            if xy == None:
-                continue 
-            points.append(xy)
-
-        if len(points)==0:
-            return
         hull = ConvexHull(points)
         area  = hull.volume
-        yield centre, area
+        yield cname, area
 
+    def reducer_init(self):
+        """
+        find top n with a heap
+        """
+        self.n = int(self.options.n)
+        self.h = []
+        for i in range(self.n):
+            self.h.append((-99999999999,-9999999999))
+        heapq.heapify(self.h)
+
+    def reducer(self, place, area):
+        """
+        find top n with a heap
+        """
+        min_count, min_n = self.h[0]
+
+        l = list(area)
+        assert len(l)==1
+        area = l[0]
+
+        if area > min_count:
+            heapq.heapreplace(self.h, (area, place))
+
+    def reducer_final(self):
+        '''
+        sorts and yields the heap self.h
+        '''
+        self.h.sort(reverse=True)
+        for (area,place) in self.h:
+            yield place, abs(area)
 
 
 if __name__ == "__main__":

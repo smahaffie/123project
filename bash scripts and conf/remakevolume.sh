@@ -1,4 +1,4 @@
-
+‹
 mkdir /mnt/volume/zipped
 mkdir /mnt/volume/unzipped
 mkdir /mnt/volume/zippedgeo
@@ -36,14 +36,45 @@ echo "made csvs from geos"
 
 python /home/ec2-user/123project/correct_make_json.py
 mv new_json_dict.json ..
-echo "made json dict"
+echo "made vector json dict"
 
 cat /mnt/volume/unzipped/*0*.u* > /mnt/volume/superfile.txt
 echo "made superfile"
 
 python /home/ec2-user/123project/cleaners/correct_complete_vectors.py \
-    -r emr /mnt/volume/superfile --index=new_json_dict
+    -r emr /mnt/volume/superfile --index=/mnt/volume/new_json_dict.json \
+    > /mnt/volume/raw_vectors.txt
+echo "made raw vectors"
+
+
+python /home/ec2-user/123project/cleaners/generate_sample_stats.py \
+    '/mnt/volume/raw_vectors.txt' '/mnt/volume/vectors.txt' \
+    '/mnt/volume/avgs.txt' '/mnt/volume/stds.txt'
+echo "made final vectors, averages and stds"
+
+python /home/ec2-user/123project/analyzers/pairs_mapreduce.py \
+    /mnt/volume/vectors --vectors=/mnt/volume/vectors \
+    > /mnt/volume/allpairs.txt
+echo "made all pairs"
+
+python pairstoneighbors.py /mnt/volume/allpairs.txt \
+    /mnt/volume/neighbors.json /mnt/volume/allplaces.txt
+echo "made neighbordict.json and allplaces.txt"
+
+
+python /home/ec2-user/123project/analyzers/homogenous_MR.py \
+    -r emr /mnt/volume/allplaces.txt \
+    --vectors=/mnt/volume/new_json_dict.json \
+    --neighbors=/mnt/volume/neighbordict.json \
+    > homogenousareas.txt
+echo "made homogenous areas"
+
+python /home/ec2-user/123project/analyzers/surfacearea.py \
+    -r emr /mnt/volume/homogenousareas.txt \
+    --n=10 \
+    > surfaceareas.txt
+echo " found top 10 homogenous areas"
 
 
 
-
+    
