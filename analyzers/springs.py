@@ -82,29 +82,9 @@ def resting_length(xy,neighbors,vectors,average_pair_distance):
             rl[(p,n)] = geo_distance * difference(p,n,vectors)/average_pair_distance
     return rl
 
-def next_x (all_xy, rl, neighbors, here_xy):
-    """
-    calculates change in location for a place
-    returns a tuple to be turned into a dict,
-        and change to be compared against epsilon
-    """
-    name, xy = here_xy
-    x,y = xy
-    deltax = 0
-    deltay = 0
-  #  print here_xy
-    for n in neighbors[name]:
-        nx, ny = all_xy[n]
-        distance_xy_n = np.sqrt((x-nx)**2+(y-ny)**2)
-        force = rl[(name,n)]*distance_xy_n
 
-        deltax += -force*(x-nx)/distance_xy_n
-        deltay += -force*(y-ny)/distance_xy_n
 
-    movement = np.sqrt(deltax**2 + deltay**2)
-    return (name, (x + deltax, y + deltay)), movement
-
-def next_x2 (all_xy, rl, neighbors, name):
+def next_xy (all_xy, rl, neighbors, name):
     """
     calculates change in location for a place
     returns a tuple to be turned into a dict,
@@ -124,35 +104,7 @@ def next_x2 (all_xy, rl, neighbors, name):
 
     movement = np.sqrt(deltax**2 + deltay**2)
     return (name, (x + deltax, y + deltay)), movement
-"""
-parallel with pools implimentation
-"""
-def go( epsilon,
-        nthreads        = 2,
-        average_pair_distance = 2,
-        placenamesfile  = 'allnames.txt',
-        vectorsfile     = '../cleaned_data/json_vectors.json',
-        neighborsfile   = 'neighbors.json'):
-    """
-    iterates until simulation changes by less than epsilon
-    """
 
-    neighbors   = json.load(open(neighborsfile,'r'))
-    vectors     = json.load(open(vectorsfile,'r'))
-    xy          = original_xy(placenamesfile,vectors)
-    rl          = resting_length(xy,neighbors,vectors,average_pair_distance)
-
-    max_change = float('inf')
-    pool = Pool(processes = nthreads)
-
-    while(epsilon < max_change):
-        next_x_ptl = partial(next_x, xy, rl, neighbors) # map can only do 1 arg
-        res = pool.map(next_x_ptl, xy.items())
-        max_change = max([r[1] for r in res])
-        xy = dict([r[0] for r in res])
-        print(max_change)
-
-    return xy
 """
     MPI stuff
 """
@@ -174,12 +126,13 @@ def chunks(somelist, size):
 
 
 if __name__ == '__main__':
+    # MPI simulation !
 
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # Broadcast details
+    # File details
     neighbors,rl,xy,outputdir,epsilon = [None]*5
     if rank == 0:
 
@@ -210,44 +163,47 @@ if __name__ == '__main__':
         vectors     = json.load(open(vectorsfile,'r'))
         xy          = original_xy(placenamesfile,vectors)
         rl          = resting_length(xy,neighbors,vectors,average_pair_distance)
+
+        if saveallframes:
+            json.dump(xy,open("%s/frame0.json"%outputdir,'w'))
+
+
+    # Broadcast information that won't change
     neighbors = comm.bcast(neighbors,root = 0)
     rl = comm.bcast(rl, root = 0)
 
-    # run simulations
+    # run simulations until maximum change is smaller than epsilon
     max_change = float('inf')
     sim_num = 1
     while epsilon < max_change:
         if rank == 0:
             print("simulation number %d"%sim_num)
 
-        xy = comm.bcast(xy, root = 0)
+        xy = comm.bcast(xy, root = 0)                         # update locations
         my_xys = None
-        my_xys = comm.scatter(chunks(xy.keys(),size),root = 0)
+        my_xys = comm.scatter(chunks(xy.keys(),size),root = 0)# distribute tasks
         int_max_change = 0
         res = []
 
-        for num, name in enumerate(my_xys):
-            r, change = next_x2(xy, rl, neighbors, name)
+        for num, name in enumerate(my_xys):                   # do tasks
+            r, change = next_xy(xy, rl, neighbors, name)
             res.append(r)
             if change > int_max_change:
                 int_max_change = change
         print("rank %d: simulation complete"%rank)
 
-        gathered_chunks = comm.gather(res,root = 0)
+        gathered_chunks = comm.gather(res,root = 0)          # gather results         
         changes = comm.gather(int_max_change,root = 0)
         sim_num += 1
-        if rank == 0:
-            print("gathered")
 
-
-        if rank == 0:
+        if rank == 0:                                        # process results
             xy = dict(sum(gathered_chunks,[]))
             max_change = max(changes)
             if saveallframes:
                 json.dump(xy,
-                    open("{0}/frame{1}.json".format(outputdir,sim_num),'w'))
+                    open("{0}/frame{1}.json".format(outputdir,sim_num),'w'))  
 
-        max_change = comm.bcast(max_change,root = 0)
+        max_change = comm.bcast(max_change,root = 0)         # update max_change
         if rank == 0:
             print("max change:%f\n"%max_change)
 
