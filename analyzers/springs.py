@@ -146,9 +146,9 @@ if __name__ == '__main__':
             neighborsfile           = sys.argv[1]
             vectorsfile             = sys.argv[2]
             placenamesfile          = sys.argv[3]
-            average_pair_distance   = sys.argv[4]
-            epsilon                 = sys.argv[5]
-            saveallframes           = bool(sys.argv[6])
+            average_pair_distance   = float(sys.argv[4])
+            epsilon                 = float(sys.argv[5])
+            saveallframes           = bool( sys.argv[6])
         elif len(sys.argv) != 1:
             print(" Arguments in order:\n "
                 "neighbors, vectors, allnames,\n"
