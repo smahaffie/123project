@@ -12,25 +12,50 @@ def plot_setup():
     Basic set up for plots
     '''
 
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(30,30))
     h = 1500
-    my_map = Basemap(projection='nsper',lon_0=-105,lat_0=40,
-        satellite_height=h*1000.,resolution='l')
+    my_map = Basemap(llcrnrlon=-130.0,
+        llcrnrlat=20.0,
+        urcrnrlon=-60.0,
+        urcrnrlat=55.0,
+        projection='mill',
+        resolution='c')
 
     my_map.drawcoastlines()
     my_map.drawcountries()
-    my_map.fillcontinents(color='coral',lake_color='aqua')
+    my_map.fillcontinents(color='antiquewhite',lake_color='aqua')
     my_map.drawmapboundary()
     my_map.drawstates()
     my_map.drawmapboundary(fill_color='aqua')
     return my_map
 
-def plot_unique(vectors):
+def plot_unique_avg(unique,average):
     '''
-    Plots most unique places in the US
+    Set up for plotting most unique and most average places in the US
+    Inputs:
+        unique, filename
+        average, filename
+    Side effects:
+        Saves image file
     '''
+    my_map = plot_setup()
+    unique = plot_vectors(unique,my_map,"bo","Most Unique")
+    average = plot_vectors(average,my_map,"ro","Most Average")
+    plt.legend()
+    plt.title("Most Average and Unique Areas in the US")
+    plt.savefig("Most Average and Unique")
 
-    colors = "bgrcmykwbgrcmykw"
+
+def plot_vectors(vectors,my_map,color,label):
+    '''
+    Plots set of vectors places in the US
+
+    Inputs:
+        vectors, filename
+        my_map, map object
+        color, string
+        label, string
+    '''
     places = []
     lats_list = []
     lons_list = []
@@ -41,31 +66,23 @@ def plot_unique(vectors):
             line = line.split("\t")
             place = line[0]
             name_list = place.split(",")
-            name = name_list[0].split("_")
-            places.append(name[0]+", " + name[1])
+            name = name_list[0]
+            #if "city" in name:
+            name = name.replace("city","")
+            name = name.replace("CDP","")
+            name = name.split("_")
+            places.append(name[0] + "," + name[1])
+            #+", " + name[1])
             lats_list.append(float(name_list[1].strip('"')))
             lons_list.append(float(name_list[2].strip('"')))
-    fig = plt.figure(figsize=(10,10))
-    h = 1500
-    my_map = Basemap(projection='nsper',lon_0=-105,lat_0=40,
-        satellite_height=h*1000.,resolution='l')
-
-    my_map.drawcoastlines()
-    my_map.drawcountries()
-    #my_map.fillcontinents(color='coral',lake_color='aqua')
-    my_map.drawmapboundary()
-    my_map.drawstates()
-    #my_map.drawmapboundary(fill_color='aqua')
-    print(lats_list,lons_list)
     x,y = my_map(lons_list,lats_list)
-    print(x,y)
-    my_map.plot(x,y,'g')
+    my_map.plot(x,y,color,markersize=20,label=label)
+
+    '''
     for label,x,y in zip(places,lons_list,lats_list):
         xi,yi=my_map(x,y)
-        plt.text(xi+10000,yi+5000,label[1:])
-    plt.title("Most Unique Areas in the US")
-    plt.show()
-    plt.savefig("Most Unique")
+        plt.text(xi+10000,yi+10000,label[1:])'''
+
 
 
 
@@ -121,4 +138,4 @@ def plot_homogenous(vectors):
 
 if __name__ == "__main__":
     #plot_homogenous(sys.argv[1])
-    plot_unique(sys.argv[1])
+    plot_unique_avg(sys.argv[1],sys.argv[2])
