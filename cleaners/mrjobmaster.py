@@ -5,6 +5,7 @@ from mrjob.step import MRStep
 import re
 from math import radians, cos, sin, asin, sqrt
 import networkx as nx
+import sys
 
 '''
 MapReduce code to generate vectors for every "place" in the US
@@ -153,6 +154,54 @@ def generate_pairs(line,index,vectors,N):
 
     return pairs
 
+def difference(a,b):
+    '''
+    finds difference between two places
+    if data is missing we ignore that dimension
+    we calculate the root mean squared distance between each dimension
+    '''
+    v = VECTORS_DICT[a][0].split(',')
+    w = VECTORS_DICT[b][0].split(',')
+    
+    n = 0
+    tot = 0
+    for vi, wi in zip(v,w):
+        if vi == 'missing' or wi == 'missing':
+            continue
+        n += 1
+        tot += (float(vi)-float(wi))**2
+
+    return (tot/n)**.5
+
+def dykstra(origin):
+    """
+    Uses dykstra's algorithm to find shortest path to neighboring nodes
+    returns subgraph of usa such that neighbors are within epsilon of origin 
+    """
+    G = nx.Graph()
+    G.add_node(origin,shortest_path = 0)
+    active_nodes = [origin]
+
+    while len(active_nodes) > 0:
+        a_n     =  active_nodes.pop()   # active node
+
+        for n in NEIGHBORDICT.get(a_n,[]):    #catch no neighbor exception
+            d = difference(n, origin) ** 4    # increase cost of extra distance
+            this_path = G.node[a_n]['shortest_path'] + d
+
+            if this_path < EPSILON:
+                if n in G.node:                                # seen this node before
+                    if this_path < G.node[n]['shortest_path']: # if this path is better than previous best path
+                        G.node[n]['shortest_path'] = this_path   
+                        G.add_edge(a_n,n)                      # add edge just because
+                    continue
+
+                G.add_node(n,shortest_path = this_path)   # if this is new, add it to graph
+                G.add_edge(a_n,n)                 # add edge just because
+                active_nodes.append(n)            # add new active node
+
+    return G
+
 class mr_master(mrj):
     '''
     construct vectors of containing relevant variables for every location
@@ -279,9 +328,13 @@ class mr_master(mrj):
         if all_zeros==False:
             global COUNTER
             global VECTORS
+            global PLACES
+            global VECTORS_DICT
             vector = str(COUNTER) + "," + p.replace('"','') + to_yield.strip().replace('"','')
             COUNTER += 1
             VECTORS.append(vector.split(","))
+            VECTORS_DICT[place[0]] = place[1:] + vector.split(',')
+            PLACES.append(place[0])
             yield vector, None
 
     def mapper_pairs(self,vector,_):
@@ -301,7 +354,6 @@ class mr_master(mrj):
         '''
         for place2 in p:
             PAIRS.append([place,place2])
-            yield place, place2
 
     def reducer_final_pairs(self):
         global NEIGHBORDICT
@@ -311,7 +363,57 @@ class mr_master(mrj):
             neighbors = NEIGHBORDICT.get(place,[])
             neighbors.append(neighbor)
             NEIGHBORDICT[place] = neighbors
-        print(NEIGHBORDICT)
+
+        print("PLACES", PLACES)
+
+        global PLACES
+        for place in PLACES:
+            yield None, place
+
+    def mapper_init_homogenous(self):
+        '''
+        load json file with census places for every state
+        '''
+        self.vectors = VECTORS_DICT
+        self.neighbors = NEIGHBORDICT
+
+    def mapper_homogenous(self,_,line):
+        G = dykstra(line)
+
+        selfv = self.vectors.get(line,None)
+        if selfv == None:
+            pass
+
+        else:
+            slon,slat = selfv[:2]
+
+            output = []
+            for n in G.nodes():
+                v = self.vectors.get(n,None)
+                if v == None:
+                    continue
+                lon,lat = v[:2]
+                # yield (line,slon,slat) , (n,lon,lat)
+                print("MAPPER: ", line, n)
+                yield line, n
+
+    def reducer_homogenous(self,place,nodes):
+        """
+        write output as:
+        center, clon,clat | name, lon, lat; name2, ...etc
+        """
+        for n in nodes:
+            print("REDUCER: ", place, n)
+
+        '''
+        res = ','.join(place) + '|'
+        nlist = list(nodes)
+        print(nlist)
+        #print(';'.join([','.join(n) for n in nlist]))
+        for n in nlist:
+            res += ','.join(n) + ';'
+        yield res, None
+        '''
 
     def steps(self):
         return [
@@ -322,14 +424,19 @@ class mr_master(mrj):
                     reducer=self.reducer_create_vectors),
             MRStep(mapper=self.mapper_pairs,
                     reducer=self.reducer_pairs,
-                    reducer_final=self.reducer_final_pairs)
+                    reducer_final=self.reducer_final_pairs),
+            MRStep(mapper_init=self.mapper_init_homogenous,
+                    mapper=self.mapper_homogenous,
+                    reducer=self.reducer_homogenous)
         ]
-
 
 if __name__ == '__main__':
     VECTORS = []
+    VECTORS_DICT = {}
     COUNTER = 0
     PAIRS = []
     NEIGHBORDICT = {}
+    PLACES = []
+    EPSILON = int(sys.argv[3])
 
     mr_master.run()
