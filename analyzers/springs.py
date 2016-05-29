@@ -172,6 +172,7 @@ def chunks(somelist, size):
         yield chunks[i]
 
 
+
 if __name__ == '__main__':
 
     comm = MPI.COMM_WORLD
@@ -189,6 +190,20 @@ if __name__ == '__main__':
         epsilon                 = .001
         outputdir               = "springout_"+str(datetime.datetime.now())
         saveallframes           = True
+
+        if len(sys.argv) == 6:
+            neighborsfile           = sys.argv[1]
+            vectorsfile             = sys.argv[2]
+            placenamesfile          = sys.argv[3]
+            average_pair_distance   = sys.argv[4]
+            epsilon                 = sys.argv[5]
+            saveallframes           = bool(sys.argv[6])
+        elif len(sys.argv) != 1:
+            print(" Arguments in order:\n "
+                "neighbors, vectors, allnames,\n"
+                "average pair distance, epsilon,\n"
+                " save all frames (0 or 1)")
+
         os.mkdir(outputdir)
 
         neighbors   = json.load(open(neighborsfile,'r'))
