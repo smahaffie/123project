@@ -5,6 +5,8 @@ from mpi4py import MPI
 import sys
 import os
 import datetime
+import glob
+import matplotlib.pyplot as plt
 
 
 """
@@ -27,12 +29,20 @@ def mercator_projection(lon,lat):
     lon = lon * 2 * np.pi / 360 # degrees to radians
     lat = lat * 2 * np.pi / 360
 
-    x = lon / np.pi
-    y = np.log(  (1+np.sin(lat))/(1-np.sin(lat))  ) / (4*np.pi)
+    y = lon / np.pi
+    x = np.log(  (1+np.sin(lat))/(1-np.sin(lat))  ) / (4*np.pi)
 
     return x,y
 
-    
+def undo_mercator_project(x,y):
+    """
+    x,y to lon, lat
+    """
+    lon = y*np.pi
+    ex = np.exp(4*pi*x)
+    lat = np.arcsin((ex - 1)/(ex +1 ))
+    return lon, lat
+
 def difference(a,b,vectors):
     '''
     finds difference between two places
@@ -205,8 +215,21 @@ if __name__ == '__main__':
         if rank == 0:
             print("max change:%f\n"%max_change)
 
+    """
     if rank == 0:
-        print("DONE!")
+        print("Framing!")
+    mode = MPI.MODE_RDONLY
+    framefiles = glob.glob(outputdir+'/*')
+    toframe = comm.scatter(chunks(framefiles,size),root = 0)
+    for work in toframe:
+        framedict = json.load(MPI.File.Open(comm,work,mode))
+        xy = [xy for name, xy in framedict.items()]
+        xs = [x for x,y in xy]
+        ys = [y for x,y in xy]
+        fig = plt.figure()
+        fig = plt.p
+    """
+
 
     MPI.COMM_WORLD.Abort()
 
