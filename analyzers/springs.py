@@ -192,8 +192,7 @@ if __name__ == '__main__':
 
         gathered_chunks = comm.gather(res,root = 0)          # gather results         
         changes = comm.gather(int_max_change,root = 0)
-        sim_num += 1
-
+        
         if rank == 0:                                        # process results
             xy = dict(sum(gathered_chunks,[]))
             max_change = max(changes)
@@ -202,6 +201,7 @@ if __name__ == '__main__':
                     open("{0}/frame{1}.json".format(outputdir,sim_num),'w'))  
 
         max_change = comm.bcast(max_change,root = 0)         # update max_change
+        sim_num += 1
         if rank == 0:
             print("max change:%f\n"%max_change)
 
