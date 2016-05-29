@@ -3,7 +3,11 @@ import json
 
 
 if __name__ == '__main__':
-
+    """
+    takes the pairs file and makes a dictionary 
+    mapping places to a list of their neighbors
+    also writes a file of all placenames as input to surfacearea.py
+    """
     _, pairsfile, neighborsfile, allplacesfile = sys.argv
 
     f = open(pairsfile,'r')

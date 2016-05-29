@@ -94,6 +94,10 @@ class make_graph(mrj):
 
 
     def reducer(self,place,nodes):
+        """
+        write output as:
+        center, clon,clat | name, lon, lat; name2, ...etc
+        """
         res = ','.join(place) + '|'
         for n in list(nodes):
             res += ','.join(n) + ';'
