@@ -5,6 +5,15 @@ from multiprocessing import Pool
 SPRINGSPATH = "springs.py"
 PEMPATH = "~/laptop.pem"
 
+
+BIG_OL_LIST = [ ('172.31.58.163', 'ec2-54-85-163-133.compute-1.amazonaws.com'),
+                ('172.31.59.167', 'ec2-52-87-193-118.compute-1.amazonaws.com'),
+                ('172.31.59.165', 'ec2-52-91-203-100.compute-1.amazonaws.com'),
+                ('172.31.59.168', 'ec2-52-201-217-26.compute-1.amazonaws.com'),
+                ('172.31.59.166', 'ec2-54-86-48-88.compute-1.amazonaws.com'),
+                ('172.31.59.164', 'ec2-54-152-90-85.compute-1.amazonaws.com')]
+
+
 def setup(dns,iplist):
     """
     copy relavent files to instances
@@ -58,3 +67,10 @@ def go(BIG_OL_LIST):
     print('Done')
 
     os.system("mpiexec -f hosts -n %d python %s"%[len(BIG_OL_LIST), SPRINGSPATH])
+
+
+if __name__ == '__main__':
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'go':
+        print('go')
+        go(BIG_OL_LIST)

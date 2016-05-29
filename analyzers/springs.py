@@ -39,8 +39,12 @@ def undo_mercator_project(x,y):
     x,y to lon, lat
     """
     lon = y*np.pi
-    ex = np.exp(4*pi*x)
+    ex = np.exp(4*np.pi*x)
     lat = np.arcsin((ex - 1)/(ex +1 ))
+
+    lon = lon*360/2/np.pi # radians to degrees
+    lat = lat*360 /2/np.pi
+
     return lon, lat
 
 def difference(a,b,vectors):
@@ -214,21 +218,6 @@ if __name__ == '__main__':
         sim_num += 1
         if rank == 0:
             print("max change:%f\n"%max_change)
-
-    """
-    if rank == 0:
-        print("Framing!")
-    mode = MPI.MODE_RDONLY
-    framefiles = glob.glob(outputdir+'/*')
-    toframe = comm.scatter(chunks(framefiles,size),root = 0)
-    for work in toframe:
-        framedict = json.load(MPI.File.Open(comm,work,mode))
-        xy = [xy for name, xy in framedict.items()]
-        xs = [x for x,y in xy]
-        ys = [y for x,y in xy]
-        fig = plt.figure()
-        fig = plt.p
-    """
 
 
     MPI.COMM_WORLD.Abort()
