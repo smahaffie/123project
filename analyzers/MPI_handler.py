@@ -66,7 +66,7 @@ def go(BIG_OL_LIST):
             cross_ssh(ip2,dns)
     print('Done')
 
-    os.system("mpiexec -f hosts -n {} python {}".format(len(BIG_OL_LIST), SPRINGSPATH])
+    os.system("mpiexec -f hosts -n {} python {}".format(len(BIG_OL_LIST), SPRINGSPATH))
 
 
 if __name__ == '__main__':
