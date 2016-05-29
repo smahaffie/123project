@@ -93,7 +93,6 @@ def next_xy (all_xy, rl, neighbors, name):
     x,y = all_xy[name]
     deltax = 0
     deltay = 0
-  #  print here_xy
     for n in neighbors[name]:
         nx, ny = all_xy[n]
         distance_xy_n = np.sqrt((x-nx)**2+(y-ny)**2)
