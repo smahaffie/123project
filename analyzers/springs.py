@@ -1,6 +1,5 @@
 import numpy as np
 import json
-from multiprocessing import Pool
 from functools import partial
 from mpi4py import MPI
 import sys
@@ -209,7 +208,6 @@ if __name__ == '__main__':
     if rank == 0:
         print("DONE!")
 
-   # MPI.Finalize()
     MPI.COMM_WORLD.Abort()
 
 

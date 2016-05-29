@@ -5,7 +5,7 @@ from multiprocessing import Pool
 SPRINGSPATH = "springs.py"
 PEMPATH = "~/laptop.pem"
 
-def setup(dns):
+def setup(dns,iplist):
     """
     copy relavent files to instances
     """
@@ -15,9 +15,10 @@ def setup(dns):
         sudo yum install mpich-devel    \n
         echo export PATH=/usr/lib64/mpich/bin/:$PATH >> .bashrc\n
         echo export LD_LIBRARY_PATH=/usr/lib64/mpich/lib/:$LD_LIBRARY_PATHPATH >> .bashrc\n
-        source .bashrc\n
-        echo private-ip-1 >> hosts\n
-        echo private-ip-2 >> hosts\n
+        source .bashrc\n """)
+    for ip in iplist:
+        os.system('echo %s >> hosts'%ip)
+    os.system("""
         sudo pip install numpy\n
         wget https://pypi.python.org/packages/source/m/mpi4py/mpi4py-1.3.1.tar.gz\n
         tar xzf mpi4py-1.3.1.tar.gz\n
@@ -41,13 +42,16 @@ def cross_ssh(ip, dns):
 BIG_OL_LIST = []
 
 def go(BIG_OL_LIST):
-
+    """
+    run setup and cross ssh into each instance
+    """
     for ip, dns in BIG_OL_LIST:
-        setup(dns)
         otherips = []
         for ip2,dns2 in BIG_OL_LIST:
             if ip != ip2:
                 otherips.append(ip2)
-
+        setup(dns,otherips)
         for ip2 in otherips:
             cross_ssh(ip2,dns)
+    print('Done')
+
