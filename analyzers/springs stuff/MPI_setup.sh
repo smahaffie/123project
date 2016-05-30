@@ -1,7 +1,7 @@
 
-echo "pempath" $1
-echo "dns" $2
-echo "springspath" $3
+echo pempath $1
+echo dns $2
+echo springspath $3
 
 scp -i $1 -o StrictHostKeyChecking=no $1 ec2-user@$2:~/
 scp -i $1 -o StrictHostKeyChecking=no $2 ec2-user@$2:~/.ssh/id_rsa

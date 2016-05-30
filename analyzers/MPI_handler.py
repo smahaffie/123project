@@ -31,6 +31,7 @@ def cross_ssh(ip, dns):
     """
     ssh between different instances so they can cross communicate
     """
+    
     os.system("ssh -i %s ec2-user@%s"%[PEMPATH, dns]) 
     os.system("ssh -i %s -o 'StrictHostKeyChecking no'"%[ip])
     os.system("exit")
