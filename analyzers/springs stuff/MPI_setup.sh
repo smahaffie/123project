@@ -16,6 +16,8 @@ tar xzf mpi4py-1.3.1.tar.gz
 cd mpi4py-1.3.1 
 python setup.py build 
 sudo python setup.py install 
+
+echo 'done here'
     
 # ec2-54-84-232-149.compute-1.amazonaws.com
 
@@ -40,6 +42,7 @@ ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-84-232-149.comp
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-84-232-149.compute-1.amazonaws.com "cd mpi4py-1.3.1" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-84-232-149.compute-1.amazonaws.com "python setup.py build" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-84-232-149.compute-1.amazonaws.com "sudo python setup.py install " 
+echo 'done ec2-54-84-232-149.compute-1.amazonaws.com'
         
 # ec2-54-85-171-19.compute-1.amazonaws.com
 
@@ -64,6 +67,7 @@ ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-171-19.compu
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-171-19.compute-1.amazonaws.com "cd mpi4py-1.3.1" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-171-19.compute-1.amazonaws.com "python setup.py build" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-171-19.compute-1.amazonaws.com "sudo python setup.py install " 
+echo 'done ec2-54-85-171-19.compute-1.amazonaws.com'
         
 # ec2-54-86-44-218.compute-1.amazonaws.com
 
@@ -88,6 +92,7 @@ ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-86-44-218.compu
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-86-44-218.compute-1.amazonaws.com "cd mpi4py-1.3.1" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-86-44-218.compute-1.amazonaws.com "python setup.py build" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-86-44-218.compute-1.amazonaws.com "sudo python setup.py install " 
+echo 'done ec2-54-86-44-218.compute-1.amazonaws.com'
         
 # ec2-54-172-189-241.compute-1.amazonaws.com
 
@@ -112,6 +117,7 @@ ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-172-189-241.com
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-172-189-241.compute-1.amazonaws.com "cd mpi4py-1.3.1" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-172-189-241.compute-1.amazonaws.com "python setup.py build" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-172-189-241.compute-1.amazonaws.com "sudo python setup.py install " 
+echo 'done ec2-54-172-189-241.compute-1.amazonaws.com'
         
 # ec2-54-174-149-115.compute-1.amazonaws.com
 
@@ -136,8 +142,9 @@ ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-174-149-115.com
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-174-149-115.compute-1.amazonaws.com "cd mpi4py-1.3.1" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-174-149-115.compute-1.amazonaws.com "python setup.py build" 
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-174-149-115.compute-1.amazonaws.com "sudo python setup.py install " 
+echo 'done ec2-54-174-149-115.compute-1.amazonaws.com'
         
-#cross ssh
+echo 'cross ssh'
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-163-133.compute-1.amazonaws.com "ssh 172.31.57.70"
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-163-133.compute-1.amazonaws.com "ssh 172.31.57.69"
 ssh -i ../laptop.pem -o StrictHostKeyChecking=no ec2-user@ec2-54-85-163-133.compute-1.amazonaws.com "ssh 172.31.57.68"

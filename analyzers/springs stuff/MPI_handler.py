@@ -37,6 +37,8 @@ tar xzf mpi4py-1.3.1.tar.gz
 cd mpi4py-1.3.1 
 python setup.py build 
 sudo python setup.py install 
+
+echo 'done here'
     """.format(echo)
 
     f.write(here)
@@ -65,11 +67,12 @@ ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "tar xzf mpi4py-1.3.1.tar.gz
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "cd mpi4py-1.3.1" 
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "python setup.py build" 
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo python setup.py install " 
+echo 'done {1}'
         """.format(PEMPATH,dns,echo,SPRINGSPATH)
         f.write(there)
 
     #cross ssh
-    f.write("\n#cross ssh\n")
+    f.write("\necho 'cross ssh'\n")
     for ip,dns in BIG_OL_LIST:
         for ip2,dns2 in BIG_OL_LIST:
             if ip != ip2:
@@ -78,6 +81,7 @@ ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo python setup.py instal
 
     f.close()
 
-
+if __name__ == '__main__':
+    write_superbash()
 
 
