@@ -3,7 +3,8 @@ import sys
 from multiprocessing import Pool
 
 SPRINGSPATH = "springs.py"
-PEMPATH = "~/laptop.pem"
+PEMPATH = "../laptop.pem"
+NO_STRICT_KEY = "-o 'StrictHostKeyChecking no'"
 
 
 BIG_OL_LIST = [
@@ -15,52 +16,68 @@ BIG_OL_LIST = [
                 ('172.31.57.71', 'ec2-54-174-149-115.compute-1.amazonaws.com'),
             ]
 
-def setup(dns,iplist):
-    """
-    copy relavent files to instances
-    install stuff
-    """
-    os.system("bash MPI_setup.sh {} {} {}".format(PEMPATH,dns,SPRINGSPATH))
-    for ip in iplist:
-        os.system('echo %s >> hosts'%ip)
+def write_superbash():
 
-    os.system("exit")
+    f = open('mpi_setup.sh','w')
+    echo = ''
+    for ip, dns in BIG_OL_LIST[1:]:
+        echo += 'echo {} >> hosts \n'.format(ip)
 
 
-def cross_ssh(ip, dns):
-    """
-    ssh between different instances so they can cross communicate
-    """
-    os.system("ssh -i %s ec2-user@%s"%[PEMPATH, dns]) 
-    os.system("ssh -i %s -o 'StrictHostKeyChecking no'"%[ip])
-    os.system("exit")
-    os.system("exit")
+    here = """#master node
+sudo yum install mpich-devel
+echo export PATH=/usr/lib64/mpich/bin/:$PATH >> .bashrc 
+echo export LD_LIBRARY_PATH=/usr/lib64/mpich/lib/:$LD_LIBRARY_PATHPATH >> .bashrc 
+source .bashrc 
 
-BIG_OL_LIST = []
+{} 
+sudo pip install numpy 
+wget https://pypi.python.org/packages/source/m/mpi4py/mpi4py-1.3.1.tar.gz 
+tar xzf mpi4py-1.3.1.tar.gz 
+cd mpi4py-1.3.1 
+python setup.py build 
+sudo python setup.py install 
+    """.format(echo)
 
-def go(BIG_OL_LIST):
-    """
-    run setup and cross ssh into each instance
-    assuming
-    """
-    for ip, dns in BIG_OL_LIST:
+    f.write(here)
 
-        otherips = []
+    for ip,dns in BIG_OL_LIST[1:]:
+        echo = ''
         for ip2,dns2 in BIG_OL_LIST:
             if ip != ip2:
-                otherips.append(ip2)
+                echo += 'ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "echo {2} >> hosts" \n'.format(PEMPATH,dns,ip2)
+        there ="""
+# {1}
 
-        setup(dns,otherips)
+scp -i {0} -o StrictHostKeyChecking=no {0} ec2-user@{1}:~/.ssh/id_rsa
+scp -i {0} -o StrictHostKeyChecking=no {3} ec2-user@{1}:~
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo easy_install pip" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo easy_install --upgrade pip" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo /usr/local/bin/pip install numpy" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo yum install mpich-devel"
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "echo export PATH=/usr/lib64/mpich/bin/:$PATH >> .bashrc" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "echo export LD_LIBRARY_PATH=/usr/lib64/mpich/lib/:$LD_LIBRARY_PATHPATH >> .bashrc" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "source .bashrc" 
 
-        for ip2 in otherips:
-            os.system("bash MPI_cross_ssh.sh {} {} {}".format(PEMPATH,dns,ip))
+{2}
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "wget https://pypi.python.org/packages/source/m/mpi4py/mpi4py-1.3.1.tar.gz" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "tar xzf mpi4py-1.3.1.tar.gz" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "cd mpi4py-1.3.1" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "python setup.py build" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo python setup.py install " 
+        """.format(PEMPATH,dns,echo,SPRINGSPATH)
+        f.write(there)
 
-    print('Done')
+    #cross ssh
+    f.write("\n#cross ssh\n")
+    for ip,dns in BIG_OL_LIST:
+        for ip2,dns2 in BIG_OL_LIST:
+            if ip != ip2:
+                s = '''ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "ssh {2}"\n'''.format(PEMPATH,dns,ip2)
+                f.write(s)
 
-    os.system("mpiexec -f hosts -n {} python {}".format(len(BIG_OL_LIST), SPRINGSPATH))
+    f.close()
 
-if __name__ == '__main__':
 
-    if len(sys.argv) > 1 and sys.argv[1] == 'go':
-        print('go')
-        go(BIG_OL_LIST)
+
+
