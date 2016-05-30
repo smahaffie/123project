@@ -6,6 +6,8 @@ import re
 from math import radians, cos, sin, asin, sqrt
 import networkx as nx
 import sys
+from scipy.spatial import ConvexHull
+import heapq
 
 '''
 MapReduce code to generate vectors for every "place" in the US
@@ -364,8 +366,6 @@ class mr_master(mrj):
             neighbors.append(neighbor)
             NEIGHBORDICT[place] = neighbors
 
-        print("PLACES", PLACES)
-
         global PLACES
         for place in PLACES:
             yield None, place
@@ -393,27 +393,61 @@ class mr_master(mrj):
                 if v == None:
                     continue
                 lon,lat = v[:2]
-                # yield (line,slon,slat) , (n,lon,lat)
-                print("MAPPER: ", line, n)
-                yield line, n
+                yield (line,slon,slat) , (n,lon,lat)
 
-    def reducer_homogenous(self,place,nodes):
+    def reducer_homogenous_to_surface_area(self,centre,nodes):
         """
-        write output as:
-        center, clon,clat | name, lon, lat; name2, ...etc
+        takes in a line, seperate centre of homeogenous area
+        from all the nodes, then makes hull of points to proxy for area
         """
+
+        cname, clon, clat = centre
+        points = []
         for n in nodes:
-            print("REDUCER: ", place, n)
+            if n == '':
+                continue
+            nname, nlon, nlat = n
+            points.append((float(nlon),float(nlat)))
 
+        print(points)
+
+        hull = ConvexHull(points)
+        area  = hull.volume
+        yield cname, area
+
+    def mapper_surface_area(self, cname, area):
+        yield cname, area
+
+    def reducer_init_surface_area(self):
+        """
+        find top n with a heap
+        """
+        self.n = int(self.options.n)
+        self.h = []
+        for i in range(self.n):
+            self.h.append((-99999999999,-9999999999))
+        heapq.heapify(self.h)
+
+    def reducer_surface_area(self, place, area):
+        """
+        find top n with a heap
+        """
+        min_count, min_n = self.h[0]
+
+        l = list(area)
+        assert len(l)==1
+        area = l[0]
+
+        if area > min_count:
+            heapq.heapreplace(self.h, (area, place))
+
+    def reducer_final_surface_area(self):
         '''
-        res = ','.join(place) + '|'
-        nlist = list(nodes)
-        print(nlist)
-        #print(';'.join([','.join(n) for n in nlist]))
-        for n in nlist:
-            res += ','.join(n) + ';'
-        yield res, None
+        sorts and yields the heap self.h
         '''
+        self.h.sort(reverse=True)
+        for (area,place) in self.h:
+            yield place, abs(area)
 
     def steps(self):
         return [
@@ -427,7 +461,11 @@ class mr_master(mrj):
                     reducer_final=self.reducer_final_pairs),
             MRStep(mapper_init=self.mapper_init_homogenous,
                     mapper=self.mapper_homogenous,
-                    reducer=self.reducer_homogenous)
+                    reducer=self.reducer_homogenous_to_surface_area),
+            MRStep(mapper=self.mapper_surface_area,
+                    reducer_init=self.reducer_init_surface_area,
+                    reducer=self.reducer_surface_area,
+                    reducer_final=self.reducer_final_surface_area)
         ]
 
 if __name__ == '__main__':
@@ -437,6 +475,7 @@ if __name__ == '__main__':
     PAIRS = []
     NEIGHBORDICT = {}
     PLACES = []
-    EPSILON = int(sys.argv[3])
+    EPSILON = int(sys.argv[5])
+    N = int(sys.argv[6])
 
     mr_master.run()
