@@ -10,11 +10,11 @@ THIS FILE WRITES THE INSTRUCTIONS FOR SETTING UP MULTIPLE
 
 SPRINGSPATH = "springs.py"
 PEMPATH = "~/laptop.pem"
-NO_STRICT_KEY = "-o 'StrictHostKeyChecking no'"
+NO_STRICT_KEY = "-o StrictHostKeyChecking no"
 
 
 IP_DNS_LIST = [
-                ('172.31.48.191', 'ec2-52-90-136-20.compute-1.amazonaws.com'), # node 0
+                ('172.31.48.191', 'ec2-52-90-136-20.compute-1.amazonaws.com'), # main
                 ('172.31.48.189', 'ec2-54-85-253-140.compute-1.amazonaws.com'),
                 ('172.31.48.192', 'ec2-54-89-105-133.compute-1.amazonaws.com'),
                 ('172.31.48.190', 'ec2-54-174-186-93.compute-1.amazonaws.com'),
@@ -60,6 +60,7 @@ echo 'done here'
 
 scp -i {0} -o StrictHostKeyChecking=no {0} ec2-user@{1}:~/.ssh/id_rsa
 scp -i {0} -o StrictHostKeyChecking=no {3} ec2-user@{1}:~
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo yum update"
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo easy_install pip" 
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo easy_install --upgrade pip" 
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo /usr/local/bin/pip install numpy" 
@@ -72,9 +73,8 @@ ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "source .bashrc"
 {2}
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "wget https://pypi.python.org/packages/source/m/mpi4py/mpi4py-1.3.1.tar.gz" 
 ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "tar xzf mpi4py-1.3.1.tar.gz" 
-ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "cd mpi4py-1.3.1" 
-ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "python setup.py build" 
-ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo python setup.py install " 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "python mpi4py-1.3.1/setup.py build" 
+ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "sudo python mpi4py-1.3.1/setup.py install " 
 echo 'done {1}'
         """.format(PEMPATH,dns,echo,SPRINGSPATH)
         f.write(there)

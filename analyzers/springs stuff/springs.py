@@ -6,7 +6,6 @@ import sys
 import os
 import datetime
 import glob
-import matplotlib.pyplot as plt
 
 
 """
@@ -109,10 +108,10 @@ def next_xy (all_xy, rl, neighbors, name):
     for n in neighbors[name]:
         nx, ny = all_xy[n]
         distance_xy_n = np.sqrt((x-nx)**2+(y-ny)**2)
-        force = rl[(name,n)]*distance_xy_n
+        force = (rl[(name,n)]-distance_xy_n)
 
-        deltax += -force*(x-nx)/distance_xy_n
-        deltay += -force*(y-ny)/distance_xy_n
+        deltax += force*(x-nx)/distance_xy_n
+        deltay += force*(y-ny)/distance_xy_n
 
     movement = np.sqrt(deltax**2 + deltay**2)
     return (name, (x + deltax, y + deltay)), movement
@@ -148,13 +147,13 @@ if __name__ == '__main__':
     neighbors,rl,xy,outputdir,epsilon = [None]*5
     if rank == 0:
 
-        neighborsfile           = 'neighbors.json'
-        vectorsfile             = '../cleaned_data/json_vectors.json'
-        placenamesfile          = 'allnames.txt'
-        average_pair_distance   = 2
+        neighborsfile           = '../neighbors.json'
+        vectorsfile             = '../../cleaned_data/json_vectors.json'
+        placenamesfile          = '../allnames.txt'
+        average_pair_distance   = 200
         epsilon                 = .001
         outputdir               = "springout_"+str(datetime.datetime.now())
-        saveallframes           = True
+        saveallframes           = False
 
         if len(sys.argv) == 6:
             neighborsfile           = sys.argv[1]
