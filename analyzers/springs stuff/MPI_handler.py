@@ -3,7 +3,7 @@ import sys
 from multiprocessing import Pool
 
 SPRINGSPATH = "springs.py"
-PEMPATH = "../laptop.pem"
+PEMPATH = "~/laptop.pem"
 NO_STRICT_KEY = "-o 'StrictHostKeyChecking no'"
 
 
