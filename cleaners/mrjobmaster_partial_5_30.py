@@ -4,7 +4,7 @@ import json
 from mrjob.step import MRStep
 import re
 from math import radians, cos, sin, asin, sqrt
-import networkx as nx
+#import networkx as nx
 import sys
 from scipy.spatial import ConvexHull
 import heapq
