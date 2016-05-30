@@ -20,9 +20,9 @@ def setup(dns,iplist):
     copy relavent files to instances
     install stuff
     """
-    os.system("scp -i %s %s ec2-user@%s:~/"%[PEMPATH,SPRINGSPATH,dns])
-    os.system('scp  -i%s %s ec2-user@%s:~/.ssh/id_rsa'%[PEMPATH,PEMPATH, dns])
-    os.system("ssh -i %s ec2-user@%s"%[PEMPATH, dns])
+    os.system("scp -i %s -oStrictHostKeyChecking=no %s ec2-user@%s:~/"%[PEMPATH,SPRINGSPATH,dns])
+    os.system('scp -i %s -oStrictHostKeyChecking=no %s ec2-user@%s:~/.ssh/id_rsa'%[PEMPATH,PEMPATH, dns])
+    os.system("ssh -i %s -oStrictHostKeyChecking=no ec2-user@%s"%[PEMPATH, dns])
     os.system("sudo yum install pip")
     os.system("sudo pip install --upgrade pip")
     os.system("sudo pip install mpi4py")
@@ -39,7 +39,7 @@ def cross_ssh(ip, dns):
     ssh between different instances so they can cross communicate
     """
     os.system("ssh -i %s ec2-user@%s"%[PEMPATH, dns]) 
-    os.system('ssh -i %s -o %s '%[ip, PEMPATH,"'StrictHostKeyChecking no'"])
+    os.system("ssh -i %s -o 'StrictHostKeyChecking no'"%[ip])
     os.system("exit")
     os.system("exit")
 
