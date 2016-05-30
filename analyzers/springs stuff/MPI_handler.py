@@ -76,7 +76,7 @@ echo 'done {1}'
     for ip,dns in BIG_OL_LIST:
         for ip2,dns2 in BIG_OL_LIST:
             if ip != ip2:
-                s = '''ssh -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "ssh {2}"\n'''.format(PEMPATH,dns,ip2)
+                s = '''ssh -t -i {0} -o StrictHostKeyChecking=no ec2-user@{1} "ssh {2}"\n'''.format(PEMPATH,dns,ip2)
                 f.write(s)
 
     f.close()
