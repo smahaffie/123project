@@ -6,13 +6,14 @@ SPRINGSPATH = "springs.py"
 PEMPATH = "~/laptop.pem"
 
 
-BIG_OL_LIST = [ ('172.31.58.163', 'ec2-54-85-163-133.compute-1.amazonaws.com'),
-                ('172.31.59.167', 'ec2-52-87-193-118.compute-1.amazonaws.com'),
-                ('172.31.59.165', 'ec2-52-91-203-100.compute-1.amazonaws.com'),
-                ('172.31.59.168', 'ec2-52-201-217-26.compute-1.amazonaws.com'),
-                ('172.31.59.166', 'ec2-54-86-48-88.compute-1.amazonaws.com'),
-                ('172.31.59.164', 'ec2-54-152-90-85.compute-1.amazonaws.com')]
-
+BIG_OL_LIST = [
+                ('172.31.58.163', 'ec2-54-85-163-133.compute-1.amazonaws.com'), # node 0
+                ('172.31.57.70', 'ec2-54-84-232-149.compute-1.amazonaws.com'),
+                ('172.31.57.69', 'ec2-54-85-171-19.compute-1.amazonaws.com'),
+                ('172.31.57.68', 'ec2-54-86-44-218.compute-1.amazonaws.com'),
+                ('172.31.57.67', 'ec2-54-172-189-241.compute-1.amazonaws.com'),
+                ('172.31.57.71', 'ec2-54-174-149-115.compute-1.amazonaws.com'),
+            ]
 
 def setup(dns,iplist):
     """
@@ -20,25 +21,18 @@ def setup(dns,iplist):
     install stuff
     """
     os.system("scp -i %s %s ec2-user@%s:~/"%[PEMPATH,SPRINGSPATH,dns])
+    os.system('scp  -i%s %s ec2-user@%s:~/.ssh/id_rsa'%[PEMPATH,PEMPATH, dns])
     os.system("ssh -i %s ec2-user@%s"%[PEMPATH, dns])
-    os.system("""
-        sudo yum install mpich-devel    \n
-        echo export PATH=/usr/lib64/mpich/bin/:$PATH >> .bashrc\n
-        echo export LD_LIBRARY_PATH=/usr/lib64/mpich/lib/:$LD_LIBRARY_PATHPATH >> .bashrc\n
-        source .bashrc\n """)
+    os.system("sudo yum install pip")
+    os.system("sudo pip install --upgrade pip")
+    os.system("sudo pip install mpi4py")
+    os.system("sudo pip install numpy")
 
     for ip in iplist:
         os.system('echo %s >> hosts'%ip)
 
-    os.system("""
-        sudo pip install numpy\n
-        wget https://pypi.python.org/packages/source/m/mpi4py/mpi4py-1.3.1.tar.gz\n
-        tar xzf mpi4py-1.3.1.tar.gz\n
-        cd mpi4py-1.3.1\n
-        python setup.py build\n
-        sudo python setup.py install\n """)
     os.system("exit")
-    os.system('scp  -i%s %s ec2-user@%s:~/.ssh/id_rsa'%[PEMPATH,PEMPATH, dns])
+
 
 def cross_ssh(ip, dns):
     """
@@ -67,7 +61,6 @@ def go(BIG_OL_LIST):
     print('Done')
 
     os.system("mpiexec -f hosts -n {} python {}".format(len(BIG_OL_LIST), SPRINGSPATH))
-
 
 if __name__ == '__main__':
 
