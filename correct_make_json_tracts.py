@@ -18,7 +18,7 @@ def create_json():
 	json_dict["uSF3"] = {}
 
 	for state in state_list:
-		with open("{}_uSF1_tracts.csv".format(state)) as f:
+		with open("{}_uSF1_block.csv".format(state)) as f:
 			json_dict["uSF1"][state] = {}
 			json_dict["uSF1"][state]["indexes"] = []
 			json_dict["uSF1"][state]["tuples"] = {}
@@ -28,7 +28,7 @@ def create_json():
 				json_dict["uSF1"][state]["tuples"][row[0]] = [row[1],row[2],row[3]]
 				json_dict["uSF1"][state]["indexes"].append(row[0])
 
-		with open("{}_uSF3_tracts.csv".format(state)) as f:
+		with open("{}_uSF3_block.csv".format(state)) as f:
 			json_dict["uSF3"][state] = {}
 			json_dict["uSF3"][state]["indexes"] = []
 			json_dict["uSF3"][state]["tuples"] = {}
@@ -37,7 +37,7 @@ def create_json():
 				json_dict["uSF3"][state]["tuples"][row[0]]=[row[1],row[2],row[3]]
 				json_dict["uSF3"][state]["indexes"].append(row[0])
 
-	with open("json_dict_tracts.json",'w') as f:
+	with open("json_dict_blocks.json",'w') as f:
 		json.dump(json_dict,f)
 
 if __name__=="__main__":
