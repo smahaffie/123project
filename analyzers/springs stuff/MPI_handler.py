@@ -20,14 +20,7 @@ def setup(dns,iplist):
     copy relavent files to instances
     install stuff
     """
-    os.system("scp -i %s -oStrictHostKeyChecking=no %s ec2-user@%s:~/"%[PEMPATH,SPRINGSPATH,dns])
-    os.system('scp -i %s -oStrictHostKeyChecking=no %s ec2-user@%s:~/.ssh/id_rsa'%[PEMPATH,PEMPATH, dns])
-    os.system("ssh -i %s -oStrictHostKeyChecking=no ec2-user@%s"%[PEMPATH, dns])
-    os.system("sudo yum install pip")
-    os.system("sudo pip install --upgrade pip")
-    os.system("sudo pip install mpi4py")
-    os.system("sudo pip install numpy")
-
+    os.system("bash MPI_setup.sh {} {} {}".format(PEMPATH,dns,SPRINGSPATH))
     for ip in iplist:
         os.system('echo %s >> hosts'%ip)
 
@@ -51,13 +44,17 @@ def go(BIG_OL_LIST):
     assuming
     """
     for ip, dns in BIG_OL_LIST:
+
         otherips = []
         for ip2,dns2 in BIG_OL_LIST:
             if ip != ip2:
                 otherips.append(ip2)
+
         setup(dns,otherips)
+
         for ip2 in otherips:
-            cross_ssh(ip2,dns)
+            os.system("bash MPI_cross_ssh.sh {} {} {}".format(PEMPATH,dns,ip))
+
     print('Done')
 
     os.system("mpiexec -f hosts -n {} python {}".format(len(BIG_OL_LIST), SPRINGSPATH))
