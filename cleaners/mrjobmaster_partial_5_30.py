@@ -477,7 +477,7 @@ if __name__ == '__main__':
     PAIRS = []
     NEIGHBORDICT = {}
     PLACES = []
-    EPSILON = int(sys.argv[5])
-    N = int(sys.argv[6])
+    EPSILON = int(sys.argv[7])
+    N = int(sys.argv[8])
 
     mr_master.run()
