@@ -54,7 +54,7 @@ def difference(a,b,vectors):
     '''
     v = vectors[a][0].split(',')
     w = vectors[b][0].split(',')
-    
+
     n = 0
     tot = 0
     for vi, wi in zip(v,w):
@@ -76,7 +76,9 @@ def original_xy(placenamesfile,vectors):
         if vector_p == None:
             continue
         lon, lat = vector_p[:2]
-        xy[p] = mercator_projection(float(lon),float(lat))
+        x,y = mercator_projection(float(lon),float(lat))    # position
+        px,py = 0,0                                         # momentum
+        xy[p] = x,y,px,py
     return xy
 
 def resting_length(xy,neighbors,vectors,average_pair_distance):
@@ -86,11 +88,11 @@ def resting_length(xy,neighbors,vectors,average_pair_distance):
     rl = {}
     for p,neighbors in neighbors.items():
         for n in neighbors:
-            px,py = xy.get(p,(None,None))
+            px,py,_,__ = xy.get(p,(None,None,None,None))
             if px ==None:
                 continue
-            nx,ny = xy[n]
-            geo_distance = np.sqrt((px - nx)**2 + (py - ny)**2) 
+            nx,ny,_,__ = xy[n]
+            geo_distance = np.sqrt((px - nx)**2 + (py - ny)**2)
             rl[(p,n)] = geo_distance * difference(p,n,vectors)/average_pair_distance
     return rl
 
@@ -102,19 +104,25 @@ def next_xy (all_xy, rl, neighbors, name):
     returns a tuple to be turned into a dict,
         and change to be compared against epsilon
     """
-    x,y = all_xy[name]
-    deltax = 0
-    deltay = 0
+    damping_coeff  = 0.8
+    springconstant = 0.01
+
+    x,y,px,py = all_xy[name]
+    Fx = 0
+    Fy = 0
     for n in neighbors[name]:
-        nx, ny = all_xy[n]
+        nx, ny, npx, npy = all_xy[n]
         distance_xy_n = np.sqrt((x-nx)**2+(y-ny)**2)
-        force = (rl[(name,n)]-distance_xy_n)
+        force = ( rl[(name,n)] - distance_xy_n ) * springconstant
+        Fx += force * (x-nx)/distance_xy_n
+        Fy += force * (y-ny)/distance_xy_n
+    px += Fx    #   change in momentum = force * time
+    py += Fy    #   time unit is 1 for simplicity
+    px *= damping_coeff    #   friction-like force to damp ossilation
+    py *= damping_coeff    #   so we achieve stopping condition
 
-        deltax += force*(x-nx)/distance_xy_n
-        deltay += force*(y-ny)/distance_xy_n
-
-    movement = np.sqrt(deltax**2 + deltay**2)
-    return (name, (x + deltax, y + deltay)), movement
+    movement = np.sqrt(px**2 + py**2)
+    return (name, (x + px, y + py, px, py)), movement
 
 """
     MPI stuff
@@ -150,12 +158,12 @@ if __name__ == '__main__':
         neighborsfile           = '../neighbors.json'
         vectorsfile             = '../../cleaned_data/json_vectors.json'
         placenamesfile          = '../allnames.txt'
-        average_pair_distance   = 200
+        average_pair_distance   = .02
         epsilon                 = .001
         outputdir               = "springout_"+str(datetime.datetime.now())
         saveallframes           = False
 
-        if len(sys.argv) == 6:
+        if len(sys.argv) == 7:
             neighborsfile           = sys.argv[1]
             vectorsfile             = sys.argv[2]
             placenamesfile          = sys.argv[3]
@@ -167,8 +175,8 @@ if __name__ == '__main__':
                 "neighbors, vectors, allnames,\n"
                 "average pair distance, epsilon,\n"
                 " save all frames (0 or 1)")
-
-        os.mkdir(outputdir)
+        if saveallframes:
+            os.mkdir(outputdir)
 
         neighbors   = json.load(open(neighborsfile,'r'))
         vectors     = json.load(open(vectorsfile,'r'))
@@ -195,7 +203,6 @@ if __name__ == '__main__':
         my_xys = comm.scatter(chunks(xy.keys(),size),root = 0)# distribute tasks
         int_max_change = 0
         res = []
-
         for num, name in enumerate(my_xys):                   # do tasks
             r, change = next_xy(xy, rl, neighbors, name)
             res.append(r)
@@ -203,15 +210,15 @@ if __name__ == '__main__':
                 int_max_change = change
         print("rank %d: simulation complete"%rank)
 
-        gathered_chunks = comm.gather(res,root = 0)          # gather results         
+        gathered_chunks = comm.gather(res,root = 0)          # gather results
         changes = comm.gather(int_max_change,root = 0)
-        
+
         if rank == 0:                                        # process results
             xy = dict(sum(gathered_chunks,[]))
             max_change = max(changes)
             if saveallframes:
                 json.dump(xy,
-                    open("{0}/frame{1}.json".format(outputdir,sim_num),'w'))  
+                    open("{0}/frame{1}.json".format(outputdir,sim_num),'w'))
 
         max_change = comm.bcast(max_change,root = 0)         # update max_change
         sim_num += 1
@@ -220,6 +227,3 @@ if __name__ == '__main__':
 
 
     MPI.COMM_WORLD.Abort()
-
-
-
