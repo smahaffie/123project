@@ -191,7 +191,7 @@ def dykstra(origin):
             d = difference(n, origin) ** 4    # increase cost of extra distance
             this_path = G.node[a_n]['shortest_path'] + d
 
-            if this_path < EPSILON:
+            if this_path < self.epsilon:
                 if n in G.node:                                # seen this node before
                     if this_path < G.node[n]['shortest_path']: # if this path is better than previous best path
                         G.node[n]['shortest_path'] = this_path
@@ -216,6 +216,7 @@ class mr_master(mrj):
         self.add_file_option('--index')
 
         self.add_file_option('--epsilon')
+        self.add_file_option('--N')
 
     def mapper_init_create_vectors(self):
         '''
@@ -223,6 +224,8 @@ class mr_master(mrj):
         '''
         with open(self.options.index,'r') as f:
             self.index_dict = json.load(f)
+        self.epsilon = self.options.epsilon
+        self.N = self.options.N
 
     def mapper_create_vectors(self,num, line):
         '''
@@ -477,7 +480,7 @@ if __name__ == '__main__':
     PAIRS = []
     NEIGHBORDICT = {}
     PLACES = []
-    EPSILON = int(sys.argv[8])
-    N = int(sys.argv[9])
+    #EPSILON = int(sys.argv[8])
+    #N = int(sys.argv[9])
 
     mr_master.run()
