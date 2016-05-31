@@ -68,7 +68,7 @@ class gen_vectors(mrj):
 
     def mapper(self,_,line):
         line = line.split(",")
-        if line[0]!='place'
+        if line[0]!='place':
             index = int(line[0])
             place = line[1]
             pairs = generate_pairs(line,index,self.vectors,self.N)
