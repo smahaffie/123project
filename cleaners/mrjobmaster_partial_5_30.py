@@ -191,7 +191,7 @@ def dykstra(origin):
             d = difference(n, origin) ** 4    # increase cost of extra distance
             this_path = G.node[a_n]['shortest_path'] + d
 
-            if this_path < self.epsilon:
+            if this_path < 5:
                 if n in G.node:                                # seen this node before
                     if this_path < G.node[n]['shortest_path']: # if this path is better than previous best path
                         G.node[n]['shortest_path'] = this_path
@@ -215,8 +215,8 @@ class mr_master(mrj):
         super(mr_master,self).configure_options()
         self.add_file_option('--index')
 
-        self.add_file_option('--epsilon')
-        self.add_file_option('--N')
+        #self.add_file_option('--epsilon')
+        #self.add_file_option('--N')
 
     def mapper_init_create_vectors(self):
         '''
@@ -224,8 +224,8 @@ class mr_master(mrj):
         '''
         with open(self.options.index,'r') as f:
             self.index_dict = json.load(f)
-        self.epsilon = self.options.epsilon
-        self.N = self.options.N
+        #self.epsilon = self.options.epsilon
+        #self.N = self.options.N
 
     def mapper_create_vectors(self,num, line):
         '''
@@ -427,9 +427,9 @@ class mr_master(mrj):
         """
         find top n with a heap
         """
-        self.n = int(self.options.n)
+        n = 20
         self.h = []
-        for i in range(self.n):
+        for i in range(n):
             self.h.append((-99999999999,-9999999999))
         heapq.heapify(self.h)
 
@@ -480,7 +480,7 @@ if __name__ == '__main__':
     PAIRS = []
     NEIGHBORDICT = {}
     PLACES = []
-    #EPSILON = int(sys.argv[8])
-    #N = int(sys.argv[9])
+    EPSILON = 5
+    N = 20
 
     mr_master.run()
