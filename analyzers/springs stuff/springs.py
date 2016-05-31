@@ -158,10 +158,10 @@ if __name__ == '__main__':
         neighborsfile           = '../neighbors.json'
         vectorsfile             = '../../cleaned_data/json_vectors.json'
         placenamesfile          = '../allnames.txt'
-        average_pair_distance   = .02
+        average_pair_distance   = 1.3999
         epsilon                 = .001
         outputdir               = "springout_"+str(datetime.datetime.now())
-        saveallframes           = False
+        saveallframes           = True
 
         if len(sys.argv) == 7:
             neighborsfile           = sys.argv[1]
