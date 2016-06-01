@@ -17,7 +17,7 @@ class make_graph(mrj):
         super(make_graph,self).configure_options()
         self.add_file_option('--vectors')
         self.add_file_option('--neighbors')
-        self.add_file_option('--epsilon')
+        #self.add_file_option('--epsilon')
 
     def difference(self,a,b):
         '''
@@ -72,7 +72,7 @@ class make_graph(mrj):
         '''
         self.vectors = json.load(open(self.options.vectors))
         self.neighbors = json.load(open(self.options.neighbors))
-        self.epsilon = float(self.options.epsilon)
+        self.epsilon = 7
 
     def mapper(self,_,line):
         G = self.dykstra(line)
