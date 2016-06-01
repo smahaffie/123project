@@ -52,8 +52,8 @@ def difference(a,b,vectors):
     if data is missing we ignore that dimension
     we calculate the root mean squared distance between each dimension
     '''
-    v = vectors[a][0].split(',')
-    w = vectors[b][0].split(',')
+    v = vectors[a]#[0].split(',')
+    w = vectors[b]#[0].split(',')
 
     n = 0
     tot = 0
