@@ -3,7 +3,14 @@ import re
 import sys
 import json
 
+'''
+Parses the geo files for every state in order to determine what row indexes for each state correspond to census places in the US
+'''
+
 def find_lonlat( line):
+'''
+Use regex to find the latitude and longitude of a place from the fixed width header file
+'''
 	regex = "[\+,-][0-9]{8}"
 	regex = "[\+,-][0-9]{8,11}"
 	res = re.findall(regex,line)
@@ -13,8 +20,6 @@ def find_lonlat( line):
 		lat = res[0][:3] + '.' + res[0][3:]
 		lon = res[1][:4] + '.' + res[1][4:]
 	except:
-		#print(res)
-		#print(string)
 		lat = res[0][:3] + '.' + res[0][3:]
 		lon = res[1][:4] + '.' + res[1][4:]
 
