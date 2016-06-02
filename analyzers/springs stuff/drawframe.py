@@ -53,17 +53,22 @@ def show():
         i+=1
 
 
-def draw_pretty_frame(framefile,outfile,colordict):
+def draw_pretty_frame(framefile,outfile,colordict,mercator=False):
 
     jsdict = json.load(open(framefile,'r'))
     for s in States:
         j = [v for k,v in jsdict.items() if k[-2:]== s]
-        points = [(x,y) for x,y,px,py in j]
+        points=[]
+        if mercator:
+            points = [undo_mercator_project(lon,lat) for lon,lat,_,__ in j ]
+        else:
+            points = [(x,y) for x,y,px,py in j]
         xs = [x for x,y in points]
         ys = [y for x,y in points]
         plt.scatter(xs,ys,color = colordict[s])
 
         plt.savefig(outfile)
+        plt.clf()
 
 def draw_pretty_things(outdir):
 
@@ -74,3 +79,6 @@ def draw_pretty_things(outdir):
         draw_pretty_frame(f,outname,colordict)
     print('Done!')
 
+if __name__ == '__main__':
+
+    draw_pretty_things('pics')
