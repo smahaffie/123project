@@ -1,6 +1,10 @@
 import csv
 import sys
 
+'''
+Code to add an index column entry to every row in a file
+'''
+
 rows = []
 
 def add_index(file):

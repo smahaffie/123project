@@ -66,11 +66,11 @@ def difference(a,b,vectors):
     return (tot/n)**.5
 
 
-def fix_neighbors_vectors(neighbors,vectors):
+def fix_neighbors_vectors(neighbors,vectors,lonlats):
     """
     Make sure the keys are okay
     """
-    common = set(neighbors.keys()) & set(vectors.keys())
+    common = set(neighbors.keys()) & set(vectors.keys()) & set(lonlats.keys())
     n = {}
     v = {}
     for c in common:
@@ -79,18 +79,18 @@ def fix_neighbors_vectors(neighbors,vectors):
     return n,v
 
 
-def original_xy(vectors):
+def original_xy(vectors,lonlats):
     """
     turns vectors into names and locations
     """
     xy = {}
     for name,vect in vectors.items():
-        lon,lat = vect[:2]
+        lon,lat = lonlats[name]
         try:
             lon,lat = float(lon),float(lat)
         except:
             continue
-        x,y = lon, lat#mercator_projection(lon,lat)
+        x,y = mercator_projection(lon,lat)
         px,py = 0,0
         xy[name] = (x,y,px,py)
     return xy
@@ -133,7 +133,9 @@ def next_xy (all_xy, rl, neighbors, name):
     Fy = 0
     for n in neighbors[name]:
         a = all_xy.get(n,None)
-        nx, ny, npx, npy = all_xy[n]
+        if a == None:
+            continue
+        nx, ny, npx, npy = a
         distance_xy_n = np.sqrt((x-nx)**2+(y-ny)**2)
         force = ( rl[(name,n)] - distance_xy_n ) * springconstant
         Fx += force * (x-nx)/distance_xy_n
@@ -169,13 +171,15 @@ def chunks(somelist, size):
 # Establishing globals
 neighborsfile           = '../neighbors.json'
 vectorsfile             = '../../cleaned_data/json_vectors.json'
+lonlatsfile             = 'lonlat.json'
 average_pair_distance   = 1.3999
 epsilon                 = .001
 saveallframes           = True
-if len(sys.argv) == 4:
+if len(sys.argv) == 5:
     neighborsfile           = sys.argv[1]
     vectorsfile             = sys.argv[2]
-    average_pair_distance   = float(sys.argv[3])
+    lonlatsfile             = sys.argv[3]
+    average_pair_distance   = float(sys.argv[4])
 elif len(sys.argv) != 1:
     print(" Arguments in order:\n "
         "neighbors, vectors, allnames,\n"
@@ -197,21 +201,22 @@ if __name__ == '__main__':
         if saveallframes:
             os.mkdir(outputdir)
         print('loading')
-        neighbors     = json.load(open(neighborsfile,'r'))
-        vectors       = json.load(open(vectorsfile,'r'))
-        neighbors,vectors = fix_neighbors_vectors(neighbors,vectors)
+        neighbors   = json.load(open(neighborsfile,'r'))
+        vectors     = json.load(open(vectorsfile,'r'))
+        lonlats     = json.load(open(lonlatsfile,'r'))
+        neighbors,vectors = fix_neighbors_vectors(neighbors,vectors,lonlats)
         print('fixed keys')
-        xy = original_xy(vectors)
+        xy = original_xy(vectors,lonlats)
         print('xy made with length:%d'%len(xy.items()))
         rl,neighbors,xy = resting_length(xy,neighbors,vectors,average_pair_distance)
 
-        for n, l in neighbors.items():
-            neighbors[n]=[x for x in l if x in xy.keys()]
+#        for n, l in neighbors.items():
+ #           neighbors[n]=[x for x in l if x in xy.keys()]
 
-        for p in xy.keys():
-            neighbors[p] = [n for n in neighbors[n] if (p,n) in rl.keys()]
+  #      for p in xy.keys():
+   #         neighbors[p] = [n for n in neighbors[n] if (p,n) in rl.keys()]
 
-        print('fixed keys2')
+    #    print('fixed keys2')
 
         if saveallframes:
             json.dump(xy,open("%s/frame0.json"%outputdir,'w'))
