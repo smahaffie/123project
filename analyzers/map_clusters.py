@@ -82,12 +82,14 @@ def plot_json(file1):
     colors = "bgrcmykwbgrcmykw"
 
     for key in dictionary:
-        x = dictionary[key][0]
-        y = dictionary[key][1]
+        lon = dictionary[key][0]
+        lat = dictionary[key][1]
         state = key[-2:]
+        x,y = my_map(lon,lat)
 
-        lon,lat = undo_mercator_project(x,y)
-        print(key,lon,lat)
+
+        #lon,lat = undo_mercator_project(x,y)
+        #print(key,lon,lat)
 
         if state in color_dict:
             color = color_dict[state]
@@ -99,7 +101,7 @@ def plot_json(file1):
             else:
                 counter = 0
         #print(lon,lat)
-        my_map.plot(y,x,"ro",markersize=10)
+        my_map.plot(x,y,"ro",markersize=10)
 
     plt.savefig("{}_plot.png".format(file1[:-4]))
 
