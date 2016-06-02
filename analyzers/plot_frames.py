@@ -45,6 +45,29 @@ def plot_setup():
     my_map.drawmapboundary(fill_color='aqua')
     return my_map
 
+def plot_unique_avg(unique,average):
+    '''
+    Set up for plotting most unique and most average places in the US
+    Inputs:
+        unique, filename
+        average, filename
+    Side effects:
+        Saves image file
+    '''
+    my_map = plot_setup()
+    unique = plot_vectors(unique,my_map,"bo","Most Unique")
+    average = plot_vectors(average,my_map,"ro","Most Average")
+    plt.legend()
+    plt.title("Most Average and Unique Areas in the US")
+    plt.savefig("Most Average and Unique")
+
+def get_nice_colors(n_colors):
+    '''
+    Not Original code:
+    Generages list of n "nice" colors
+    '''
+    return cm.Accent( [1 - (i/n_colors) for i in range(n_colors)] )
+
 def undo_mercator_project(x,y):
     """
     x,y to lon, lat
@@ -84,6 +107,33 @@ def plot_json(file1,num_frame):
         rows.append(row)
     plot_vectors(rows,my_map)
 
+    '''lons_list.append(lon)
+        lats_list.append(lat)
+        state = key[-2:]
+        #x,y = my_map(lon,lat)
+
+
+        #lon,lat = undo_mercator_project(x,y)
+        #print(key,lon,lat)
+
+        if state in color_dict:
+            color = color_dict[state]
+        else:
+            color_dict[state] = colors[counter]
+            color = colors[counter]
+            if counter < 15:
+                counter += 1
+            else:
+                counter = 0
+        x,y =my_map(lon,lat)
+        my_map.plot(x,y)
+        #print(lon,lat)
+        #my_map.plot(lon,lat,"ro",markersize=10,latlon=True)
+    #x,y = my_map(lons_list,lats_list)
+    #my_map.plot(x[:200],y[:200],color,markersize=20)
+    #print(len(x),len(y))
+    #for i in range(200):
+    #    my_map.plot(y[i],x[i],color,markersize=20)'''
     plt.savefig(str(num_frame))
 
 
@@ -98,6 +148,7 @@ def plot_vectors(vectors,my_map,label="vectors"):
         color, string
         label, string
     '''
+    
     colors = "bgrcmykwbgrcmykw"
 
     places = []
@@ -105,15 +156,87 @@ def plot_vectors(vectors,my_map,label="vectors"):
     lons_list = []
     size_clusters = []
     counter = 0
-
+    '''
+    with open(vectors) as f:
+        for line in f:
+            line = line.split("\t")
+            place = line[0]
+            name_list = place.split(",")
+            if len(name_list) > 2:
+                name = name_list[0]
+                name = name.replace("city","")
+                name = name.replace("CDP","")
+                name = name.split("_")
+                #print(name_list)'''
+    #color_dict = prettify_state()
     for v in vectors:
+        #print(v)
         places.append(v[0])
         lats_list.append(v[1])
         lons_list.append(v[2])
+                #places.append(name[0] + "," + name[1])
+                #lats_list.append(float(name_list[1].strip('"')))
+                #lons_list.append(float(name_list[2].strip('"')))
 
     x,y = my_map(lons_list,lats_list)
     my_map.plot(x,y,"ro",markersize=20,label=label)
 
+    '''
+    for label,x,y in zip(places,lons_list,lats_list):
+        xi,yi=my_map(x,y)
+        plt.text(xi+10000,yi+10000,label[1:])'''
+
+def plot_homogenous(vectors):
+    '''
+    Plots the 10 largest homogenous areas in the US on a map
+    Inputs:
+        vectors, file
+    Side effects:
+        Generates map
+    '''
+
+    colors = "bgrcmykwbgrcmykw"
+    places = []
+    place_lats = []
+    place_lons = []
+    lats_list = []
+    lons_list = []
+    size_clusters = []
+    counter = 0
+    with open(vectors) as f:
+        for line in f:
+            l = line.split("|")
+            place = l[0]
+            name_list = place.split(",")
+            if name_list[0] in top_k:
+                name = name_list[0].split("_")
+                place_lats.append(name_list[1])
+                place_lons.append(name_list[2])
+                places.append(name[0]+", " + name[1])
+                tups = l[1].split(";")
+                size_clusters.append(len(tups))
+                for tup in tups:
+                    t = tup.split(",")
+                    if len(t) == 3:
+                        lats_list.append(float(t[1]))
+                        lons_list.append(float(t[2]))
+
+    plot_setup()
+    counter = 0
+    for i in range(len(places)):
+        lons = lons_list[counter:counter+size_clusters[i]]
+        lats = lats_list[counter:counter+size_clusters[i]]
+        counter += size_clusters[i]
+        xi,yi = my_map(lons,lats)
+        my_map.plot(xi,yi,colors[i])
+    for label,x,y in zip(places,places_lats,places_lons):
+        xi,yi=my_map(x,y)
+        plt.text(xi+10000,yi+5000,label)
+    plt.title("Largest Homogenous Areas in the US")
+    plt.savefig("Homogenous Areas")
 
 if __name__ == "__main__":
+    #plot_homogenous(sys.argv[1])
+    #print(sys.argv[1])
     plot_json(sys.argv[1],sys.argv[2])
+    #plot_unique_avg(sys.argv[1],sys.argv[2])
