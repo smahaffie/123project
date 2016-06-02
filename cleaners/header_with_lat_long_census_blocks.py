@@ -3,6 +3,10 @@ import re
 import sys
 import json
 
+'''
+Parses the geo files to find the row indexes that correspond to census blocks for every state
+'''
+
 def find_lonlat( line):
 	'''
 	Find the geographic location of a line in the header file of the census data
