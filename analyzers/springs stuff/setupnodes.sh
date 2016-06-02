@@ -16,15 +16,15 @@ dnslist=(
     ec2-54-174-156-166.compute-1.amazonaws.com
 )
 
-copyall.sh      ~/laptop.pem ${dnslist[*]} springs.py       ~
-copyall.sh      ~/laptop.pem ${dnslist[*]} ~/laptop.pem     ~/.ssh/id_rsa 
-copyall.sh      ~/laptop.pem ${dnslist[*]} ~/laptop.pem     ~
-copyall.sh      ~/laptop.pem ${dnslist[*]} installstuff.sh  ~
-commandall.sh   ~/laptop.pem ${dnslist[*]} "bash installstuff.sh"
+bash copyall.sh      ~/laptop.pem  springs.py       ~
+bash copyall.sh      ~/laptop.pem  ~/laptop.pem     ~/.ssh/id_rsa 
+bash copyall.sh      ~/laptop.pem  ~/laptop.pem     ~
+bash copyall.sh      ~/laptop.pem  installstuff.sh  ~
+bash commandall.sh   ~/laptop.pem "bash installstuff.sh"
 
 for ip in iplist
 do
-    commandall ~/laptop.pem ${dnslist[*]} "echo ip >> hosts"
+    bash commandall ~/laptop.pem "echo ip >> hosts"
 done
 
 echo
