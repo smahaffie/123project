@@ -65,38 +65,59 @@ def difference(a,b,vectors):
 
     return (tot/n)**.5
 
-def original_xy(placenamesfile,vectors):
+
+def fix_neighbors_vectors(neighbors,vectors):
     """
-    reads in places, turns them into names and locations
+    Make sure the keys are okay
+    """
+    common = set(neighbors.keys()) & set(vectors.keys())
+    n = {}
+    v = {}
+    for c in common:
+        v[c] = vectors[c]
+        n[c] = [x for x in neighbors[c] if x in common]
+    return n,v
+
+
+def original_xy(vectors):
+    """
+    turns vectors into names and locations
     """
     xy = {}
-    for p in open(placenamesfile,'r'):
-        p = p.strip()
-        vector_p = vectors.get(p,None)
-        if vector_p == None:
+    for name,vect in vectors.items():
+        lon,lat = vect[:2]
+        try:
+            lon,lat = float(lon),float(lat)
+        except:
             continue
-        lon, lat = vector_p[:2]
-        x,y = mercator_projection(float(lon),float(lat))    # position
-        px,py = 0,0                                         # momentum
-        xy[p] = x,y,px,py
+        x,y = mercator_projection(lon,lat)
+        px,py = 0,0
+        xy[name] = (x,y,px,py)
     return xy
 
 def resting_length(xy,neighbors,vectors,average_pair_distance):
     """
-    generates dict of resting spring lengths
+    finds the resting length of springs
+    also fixes xy, neighbors to prevent future key errors
     """
     rl = {}
-    for p,neighbors in neighbors.items():
-        for n in neighbors:
-            px,py,_,__ = xy.get(p,(None,None,None,None))
-            if px ==None:
+    remove = []
+    for place, position in xy.items():
+        xp, yp, _, __ = position
+        for n in neighbors[place]:
+            npos = xy.get(n,None)
+            if npos == None:
+                neighbors[place].remove(n)
                 continue
-            nx,ny,_,__ = xy[n]
-            geo_distance = np.sqrt((px - nx)**2 + (py - ny)**2)
-            rl[(p,n)] = geo_distance * difference(p,n,vectors)/average_pair_distance
-    return rl
-
-
+            xn, yn,_,__ = npos
+            geo_distance = np.sqrt((xp - xn)**2 + (yp - yn)**2)
+            rl[(place,n)] = geo_distance * difference(place,n,vectors)/average_pair_distance
+        if len(neighbors[place])==0:
+            remove.append(place) # place has no good neighbors
+    for r in remove:
+        xy.pop(r,None)
+        neighbors.pop(r,None)
+    return rl,neighbors,xy
 
 def next_xy (all_xy, rl, neighbors, name):
     """
@@ -111,6 +132,7 @@ def next_xy (all_xy, rl, neighbors, name):
     Fx = 0
     Fy = 0
     for n in neighbors[name]:
+        a = all_xy.get(n,None)
         nx, ny, npx, npy = all_xy[n]
         distance_xy_n = np.sqrt((x-nx)**2+(y-ny)**2)
         force = ( rl[(name,n)] - distance_xy_n ) * springconstant
@@ -128,6 +150,8 @@ def next_xy (all_xy, rl, neighbors, name):
     MPI stuff
 """
 
+
+
 def chunks(somelist, size):
     """
     splits up a list into mostly equal sized bits
@@ -142,7 +166,21 @@ def chunks(somelist, size):
     for i in range(size):
         yield chunks[i]
 
-
+# Establishing globals
+neighborsfile           = '../neighbors.json'
+vectorsfile             = '../../cleaned_data/json_vectors.json'
+average_pair_distance   = 1.3999
+epsilon                 = .001
+saveallframes           = True
+if len(sys.argv) == 4:
+    neighborsfile           = sys.argv[1]
+    vectorsfile             = sys.argv[2]
+    average_pair_distance   = float(sys.argv[3])
+elif len(sys.argv) != 1:
+    print(" Arguments in order:\n "
+        "neighbors, vectors, allnames,\n"
+        "average pair distance, epsilon,\n"
+        " save all frames (0 or 1)")
 
 if __name__ == '__main__':
     # MPI simulation !
@@ -152,42 +190,33 @@ if __name__ == '__main__':
     size = comm.Get_size()
 
     # File details
+   
     neighbors,rl,xy,outputdir,epsilon = [None]*5
     if rank == 0:
-
-        neighborsfile           = '../neighbors.json'
-        vectorsfile             = '../../cleaned_data/json_vectors.json'
-        placenamesfile          = '../allnames.txt'
-        average_pair_distance   = 1.3999
-        epsilon                 = .001
-        outputdir               = "springout_"+str(datetime.datetime.now())
-        saveallframes           = True
-
-        if len(sys.argv) == 7:
-            neighborsfile           = sys.argv[1]
-            vectorsfile             = sys.argv[2]
-            placenamesfile          = sys.argv[3]
-            average_pair_distance   = float(sys.argv[4])
-            epsilon                 = float(sys.argv[5])
-            saveallframes           = bool( sys.argv[6])
-        elif len(sys.argv) != 1:
-            print(" Arguments in order:\n "
-                "neighbors, vectors, allnames,\n"
-                "average pair distance, epsilon,\n"
-                " save all frames (0 or 1)")
+        outputdir = "springout_"+str(datetime.datetime.now())
         if saveallframes:
             os.mkdir(outputdir)
+        print('loading')
+        neighbors     = json.load(open(neighborsfile,'r'))
+        vectors       = json.load(open(vectorsfile,'r'))
+        neighbors,vectors = fix_neighbors_vectors(neighbors,vectors)
+        print('fixed keys')
+        xy = original_xy(vectors)
+        print('xy made with length:%d'%len(xy.items()))
+        rl,neighbors,xy = resting_length(xy,neighbors,vectors,average_pair_distance)
 
-        neighbors   = json.load(open(neighborsfile,'r'))
-        vectors     = json.load(open(vectorsfile,'r'))
-        xy          = original_xy(placenamesfile,vectors)
-        rl          = resting_length(xy,neighbors,vectors,average_pair_distance)
+        for n, l in neighbors.items():
+            neighbors[n]=[x for x in l if x in xy.keys()]
+
+        for p in xy.keys():
+            neighbors[p] = [n for n in neighbors[n] if (p,n) in rl.keys()]
+
+        print('fixed keys2')
 
         if saveallframes:
             json.dump(xy,open("%s/frame0.json"%outputdir,'w'))
-
-
     # Broadcast information that won't change
+    epsilon = 0.001
     neighbors = comm.bcast(neighbors,root = 0)
     rl = comm.bcast(rl, root = 0)
 
@@ -203,12 +232,12 @@ if __name__ == '__main__':
         my_xys = comm.scatter(chunks(xy.keys(),size),root = 0)# distribute tasks
         int_max_change = 0
         res = []
-        for num, name in enumerate(my_xys):                   # do tasks
+        for name in my_xys:                   # do tasks
             r, change = next_xy(xy, rl, neighbors, name)
             res.append(r)
             if change > int_max_change:
                 int_max_change = change
-        print("rank %d: simulation complete"%rank)
+      #  print("rank %d: simulation complete"%rank)
 
         gathered_chunks = comm.gather(res,root = 0)          # gather results
         changes = comm.gather(int_max_change,root = 0)
