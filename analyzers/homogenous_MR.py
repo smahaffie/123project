@@ -17,6 +17,7 @@ class make_graph(mrj):
         super(make_graph,self).configure_options()
         self.add_file_option('--vectors')
         self.add_file_option('--neighbors')
+        self.add_file_option('--lat_lon')
         #self.add_file_option('--epsilon')
 
     def difference(self,a,b):
@@ -51,7 +52,7 @@ class make_graph(mrj):
             a_n     =  active_nodes.pop()   # active node
 
             for n in self.neighbors.get(a_n,[]):    #catch no neighbor exception
-                d = self.difference(n, origin)**6    # increase cost of extra distance
+                d = self.difference(n, origin)   # increase cost of extra distance
                 this_path = G.node[a_n]['shortest_path'] + d
 
                 if this_path < self.epsilon:
@@ -72,7 +73,8 @@ class make_graph(mrj):
         '''
         self.vectors = json.load(open(self.options.vectors))
         self.neighbors = json.load(open(self.options.neighbors))
-        self.epsilon = 20
+        self.lat_lon = json.load(open(self.options.lat_lon))
+        self.epsilon = 100
 
     def mapper(self,_,line):
         G = self.dykstra(line)
@@ -82,7 +84,7 @@ class make_graph(mrj):
             pass
 
         else:
-            slon,slat = selfv[:2]
+            slon,slat = self.lat_lon[line]
 
             output = []
             for n in G.nodes():
