@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 import glob
 import re
+import numpy as np
+import os
 
 States = ["AK","AL","AZ","AR","CA","CO","CT","DE","FL",
         "GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA",
@@ -17,7 +19,7 @@ def prettify_state():
     colors = matplotlib.colors.cnames
     chosen = np.random.choice(colors.keys(),len(States),False)
 
-    return dict(zip(states,chosen))
+    return dict(zip(States,chosen))
 
 
 def drawframe(framefile):
@@ -46,14 +48,16 @@ def draw_pretty_frame(framefile,outfile,colordict):
         points = [(x,y) for x,y,px,py in j]
         xs = [x for x,y in points]
         ys = [y for x,y in points]
-        plt.plot(xs,ys,colordict[s])
+        plt.scatter(xs,ys,color = colordict[s])
 
     plt.savefig(outfile)
 
-def draw_pretty_things():
+def draw_pretty_things(outdir):
 
     frames = glob.glob('frame*.json')
     colordict = prettify_state()
     for f in frames:
-        outname = f.strip('.json')
-        drawframe(f,outname,colordict)
+        outname = outdir+f.strip('.json')
+        draw_pretty_frame(f,outname,colordict)
+    print('Done!')
+
