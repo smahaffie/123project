@@ -72,7 +72,7 @@ class make_graph(mrj):
         '''
         self.vectors = json.load(open(self.options.vectors))
         self.neighbors = json.load(open(self.options.neighbors))
-        self.epsilon = 12
+        self.epsilon = 20
 
     def mapper(self,_,line):
         G = self.dykstra(line)
