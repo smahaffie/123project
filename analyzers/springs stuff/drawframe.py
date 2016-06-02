@@ -50,6 +50,8 @@ def draw_pretty_frame(framefile,outfile,colordict):
         ys = [y for x,y in points]
         plt.scatter(xs,ys,color = colordict[s])
 
+    plt.xlim([-0.001,0.003])
+    plt.ylim([-2500,15000])
     plt.savefig(outfile)
 
 def draw_pretty_things(outdir):

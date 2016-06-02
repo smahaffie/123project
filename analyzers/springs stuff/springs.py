@@ -90,7 +90,7 @@ def original_xy(vectors):
             lon,lat = float(lon),float(lat)
         except:
             continue
-        x,y = mercator_projection(lon,lat)
+        x,y = lon, lat#mercator_projection(lon,lat)
         px,py = 0,0
         xy[name] = (x,y,px,py)
     return xy
@@ -215,8 +215,10 @@ if __name__ == '__main__':
 
         if saveallframes:
             json.dump(xy,open("%s/frame0.json"%outputdir,'w'))
+            print('saved')
     # Broadcast information that won't change
     epsilon = 0.001
+    comm.barrier()
     neighbors = comm.bcast(neighbors,root = 0)
     rl = comm.bcast(rl, root = 0)
 
