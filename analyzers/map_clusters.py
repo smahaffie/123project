@@ -82,11 +82,12 @@ def plot_json(file1):
     colors = "bgrcmykwbgrcmykw"
 
     for key in dictionary:
-        y = dictionary[key][0]
-        x = dictionary[key][1]
+        x = dictionary[key][0]
+        y = dictionary[key][1]
         state = key[-2:]
 
         lon,lat = undo_mercator_project(x,y)
+        print(key,lon,lat)
 
         if state in color_dict:
             color = color_dict[state]
@@ -97,7 +98,8 @@ def plot_json(file1):
                 counter += 1
             else:
                 counter = 0
-        my_map.plot(lat,lon,color+"o",markersize=10,latlon=True)
+        #print(lon,lat)
+        my_map.plot(y,x,"ro",markersize=10)
 
     plt.savefig("{}_plot.png".format(file1[:-4]))
 
@@ -125,13 +127,15 @@ def plot_vectors(vectors,my_map,color,label):
             line = line.split("\t")
             place = line[0]
             name_list = place.split(",")
-            name = name_list[0]
-            name = name.replace("city","")
-            name = name.replace("CDP","")
-            name = name.split("_")
-            places.append(name[0] + "," + name[1])
-            lats_list.append(float(name_list[1].strip('"')))
-            lons_list.append(float(name_list[2].strip('"')))
+            if len(name_list) > 2:
+                name = name_list[0]
+                name = name.replace("city","")
+                name = name.replace("CDP","")
+                name = name.split("_")
+                #print(name_list)
+                places.append(name[0] + "," + name[1])
+                lats_list.append(float(name_list[1].strip('"')))
+                lons_list.append(float(name_list[2].strip('"')))
 
     x,y = my_map(lons_list,lats_list)
     my_map.plot(x,y,color,markersize=20,label=label)
