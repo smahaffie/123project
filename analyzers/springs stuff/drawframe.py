@@ -21,6 +21,19 @@ def prettify_state():
 
     return dict(zip(States,chosen))
 
+def undo_mercator_project(x,y):
+    """
+    x,y to lon, lat
+    """
+    lon = y*np.pi
+    ex = np.exp(4*np.pi*x)
+    lat = np.arcsin((ex - 1)/(ex +1 ))
+
+    lon = lon*360/2/np.pi # radians to degrees
+    lat = lat*360 /2/np.pi
+
+    return lon, lat
+
 
 def drawframe(framefile):
     # given a json of position and momentum, plot position
@@ -50,9 +63,7 @@ def draw_pretty_frame(framefile,outfile,colordict):
         ys = [y for x,y in points]
         plt.scatter(xs,ys,color = colordict[s])
 
-    plt.xlim([-0.001,0.003])
-    plt.ylim([-2500,15000])
-    plt.savefig(outfile)
+        plt.savefig(outfile)
 
 def draw_pretty_things(outdir):
 
