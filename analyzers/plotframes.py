@@ -2,6 +2,10 @@ import glob
 import json
 import matplotlib.pyplot as plt
 
+'''
+Condensed code to plot the json frames created by the springs simulation
+'''
+
 for filename in glob.glob('*.json'):
     outputname = filename.strip('.json')
 
