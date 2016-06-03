@@ -17,7 +17,7 @@ class make_graph(mrj):
         super(make_graph,self).configure_options()
         self.add_file_option('--vectors')
         self.add_file_option('--neighbors')
-        self.add_file_option('--lat_lon')
+
         #self.add_file_option('--epsilon')
 
     def difference(self,a,b):
@@ -28,7 +28,7 @@ class make_graph(mrj):
         '''
         v = self.vectors[a][0].split(',')
         w = self.vectors[b][0].split(',')
-        
+
         n = 0
         tot = 0
         for vi, wi in zip(v,w):
@@ -42,7 +42,7 @@ class make_graph(mrj):
     def dykstra(self,origin):
         """
         Uses dykstra's algorithm to find shortest path to neighboring nodes
-        returns subgraph of usa such that neighbors are within epsilon of origin 
+        returns subgraph of usa such that neighbors are within epsilon of origin
         """
         G = nx.Graph()
         G.add_node(origin,shortest_path = 0)
@@ -52,13 +52,13 @@ class make_graph(mrj):
             a_n     =  active_nodes.pop()   # active node
 
             for n in self.neighbors.get(a_n,[]):    #catch no neighbor exception
-                d = self.difference(n, origin)   # increase cost of extra distance
+                d = self.difference(n, origin)**4    # increase cost of extra distance
                 this_path = G.node[a_n]['shortest_path'] + d
 
                 if this_path < self.epsilon:
                     if n in G.node:                                # seen this node before
                         if this_path < G.node[n]['shortest_path']: # if this path is better than previous best path
-                            G.node[n]['shortest_path'] = this_path   
+                            G.node[n]['shortest_path'] = this_path
                             G.add_edge(a_n,n)                      # add edge just because
                         continue
 
@@ -73,8 +73,7 @@ class make_graph(mrj):
         '''
         self.vectors = json.load(open(self.options.vectors))
         self.neighbors = json.load(open(self.options.neighbors))
-        self.lat_lon = json.load(open(self.options.lat_lon))
-        self.epsilon = 100
+        self.epsilon = 5
 
     def mapper(self,_,line):
         G = self.dykstra(line)
@@ -84,7 +83,7 @@ class make_graph(mrj):
             pass
 
         else:
-            slon,slat = self.lat_lon[line]
+            slon,slat = selfv[:2]
 
             output = []
             for n in G.nodes():
@@ -107,7 +106,3 @@ class make_graph(mrj):
 
 if __name__ == "__main__":
     make_graph.run()
-
-
-
-
