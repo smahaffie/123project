@@ -90,7 +90,7 @@ def original_xy(vectors,lonlats):
             lon,lat = float(lon),float(lat)
         except:
             continue
-        x,y = mercator_projection(lon,lat)
+        x,y = lon,lat#mercator_projection(lon,lat)
         px,py = 0,0
         xy[name] = (x,y,px,py)
     return xy
