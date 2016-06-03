@@ -185,9 +185,11 @@ def plot_vectors(vectors,my_map,color="ro",label="vectors"):
 
 def plot_homogenous(vectors,topk,lonlat):
     '''
-    Plots the 10 largest homogenous areas in the US on a map
+    Plots the top k largest homogenous areas in the US on a map
     Inputs:
-        vectors, file
+        vectors, file with vectors grouped into homogenous areas
+        topk, file containing top k groupings by surface area
+        lonlat, json file containing longitude and latitude of every place
     Side effects:
         Generates map
     '''
@@ -201,7 +203,6 @@ def plot_homogenous(vectors,topk,lonlat):
         for line in f:
             l = line.split("\t")
             top_places.append(l[0].strip('"'))
-    print(top_places)
 
     colors = "bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw"
     places = []
@@ -216,48 +217,32 @@ def plot_homogenous(vectors,topk,lonlat):
         for line in f:
             l = line.split("|")
             place = l[0]
-            #if place in topk:
             name_list = place.split(",")
-            #print(name_list[0])
             if name_list[0][1:] in top_places:
-                print("!!!")
                 name = name_list[0].split("_")
                 place_lats.append(float(name_list[1]))
                 place_lons.append(float(name_list[2]))
                 places.append(name[0]+", " + name[1])
                 tups = l[1].split(";")
-                print(tups)
                 size_clusters.append(len(tups))
                 for tup in tups:
-                    print(tup)
                     t = tup.split(",")
-                    print(t)
                     if len(t) == 3:
-                        print()
                         lat = float(lonlat_dict[name_list[0][1:]][0])
                         lon = float(lonlat_dict[name_list[0][1:]][1])
                         x,y = my_map(lon,lat)
                         my_map.plot(x,y,"ro",markersize=10)
-                        #lats_list.append(float(lonlat_dict[name_list[0][1:]][0]))
-                        #lons_list.append(float(lonlat_dict[name_list[0][1:]][1]))
 
     counter = 0
+    '''
     for i in range(len(places)):
         lons = lons_list[counter:counter+size_clusters[i]]
         lats = lats_list[counter:counter+size_clusters[i]]
-        print(lons,lats)
         counter += size_clusters[i]
         xi,yi = my_map(lons,lats)
-        print(lons,lats)
-        my_map.plot(xi,yi,colors[i])
-    #for label,x,y in zip(places,place_lons,place_lats):
-    #    xi,yi=my_map(x,y)
-    #    plt.text(xi+10000,yi+5000,label)
+        my_map.plot(xi,yi,colors[i])'''
     plt.title("Largest Homogenous Areas in the US")
     plt.savefig("Homogenous Areas")
 
 if __name__ == "__main__":
     plot_homogenous(sys.argv[1],sys.argv[2],sys.argv[3])
-    #print(sys.argv[1])
-    #plot_json(sys.argv[1])
-    #plot_unique_avg(sys.argv[1],sys.argv[2])
