@@ -8,6 +8,19 @@ import matplotlib.cm as cm
 '''
 Generates all plots
 '''
+def prettify_state():
+    """
+    returns a dict {states:color code}
+    """
+    States = ["AK","AL","AZ","AR","CA","CO","CT","DE","FL",
+        "GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA",
+        "MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC",
+        "ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
+        "VA","WA","WV", "WI", "WY"]
+    colors = matplotlib.colors.cnames
+    chosen = np.random.choice(colors.keys(),len(States),False)
+
+    return dict(zip(States,chosen))
 
 def plot_setup():
     '''
@@ -80,12 +93,23 @@ def plot_json(file1):
     color_dict = {}
     counter = 0
     colors = "bgrcmykwbgrcmykw"
+    lons_list = []
+    lats_list = []
+    c = 0
+
+    rows = []
 
     for key in dictionary:
-        lon = dictionary[key][0]
-        lat = dictionary[key][1]
+        lat = dictionary[key][0]
+        lon = dictionary[key][1]
+        row = [key, lat, lon]
+        rows.append(row)
+    plot_vectors(rows,my_map)
+
+    '''lons_list.append(lon)
+        lats_list.append(lat)
         state = key[-2:]
-        x,y = my_map(lon,lat)
+        #x,y = my_map(lon,lat)
 
 
         #lon,lat = undo_mercator_project(x,y)
@@ -100,14 +124,20 @@ def plot_json(file1):
                 counter += 1
             else:
                 counter = 0
+        x,y =my_map(lon,lat)
+        my_map.plot(x,y)
         #print(lon,lat)
-        my_map.plot(x,y,"ro",markersize=10)
+        #my_map.plot(lon,lat,"ro",markersize=10,latlon=True)
+    #x,y = my_map(lons_list,lats_list)
+    #my_map.plot(x[:200],y[:200],color,markersize=20)
+    #print(len(x),len(y))
+    #for i in range(200):
+    #    my_map.plot(y[i],x[i],color,markersize=20)'''
+    plt.savefig("please.png")
 
-    plt.savefig("{}_plot.png".format(file1[:-4]))
 
 
-
-def plot_vectors(vectors,my_map,color,label):
+def plot_vectors(vectors,my_map,color="ro",label="vectors"):
     '''
     Plots set of vectors places in the US
 
@@ -124,6 +154,7 @@ def plot_vectors(vectors,my_map,color,label):
     lons_list = []
     size_clusters = []
     counter = 0
+    '''
     with open(vectors) as f:
         for line in f:
             line = line.split("\t")
@@ -134,10 +165,15 @@ def plot_vectors(vectors,my_map,color,label):
                 name = name.replace("city","")
                 name = name.replace("CDP","")
                 name = name.split("_")
-                #print(name_list)
-                places.append(name[0] + "," + name[1])
-                lats_list.append(float(name_list[1].strip('"')))
-                lons_list.append(float(name_list[2].strip('"')))
+                #print(name_list)'''
+    for v in vectors:
+        print(v)
+        places.append(v[0])
+        lats_list.append(v[1])
+        lons_list.append(v[2])
+                #places.append(name[0] + "," + name[1])
+                #lats_list.append(float(name_list[1].strip('"')))
+                #lons_list.append(float(name_list[2].strip('"')))
 
     x,y = my_map(lons_list,lats_list)
     my_map.plot(x,y,color,markersize=20,label=label)
@@ -147,7 +183,7 @@ def plot_vectors(vectors,my_map,color,label):
         xi,yi=my_map(x,y)
         plt.text(xi+10000,yi+10000,label[1:])'''
 
-def plot_homogenous(vectors):
+def plot_homogenous(vectors,topk,lonlat):
     '''
     Plots the 10 largest homogenous areas in the US on a map
     Inputs:
@@ -156,7 +192,18 @@ def plot_homogenous(vectors):
         Generates map
     '''
 
-    colors = "bgrcmykwbgrcmykw"
+    with open(lonlat) as f:
+        lonlat_dict = json.load(f)
+
+    my_map = plot_setup()
+    top_places = []
+    with open(topk) as f:
+        for line in f:
+            l = line.split("\t")
+            top_places.append(l[0].strip('"'))
+    print(top_places)
+
+    colors = "bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw"
     places = []
     place_lats = []
     place_lons = []
@@ -164,40 +211,53 @@ def plot_homogenous(vectors):
     lons_list = []
     size_clusters = []
     counter = 0
+
     with open(vectors) as f:
         for line in f:
             l = line.split("|")
             place = l[0]
+            #if place in topk:
             name_list = place.split(",")
-            if name_list[0] in top_k:
+            #print(name_list[0])
+            if name_list[0][1:] in top_places:
+                print("!!!")
                 name = name_list[0].split("_")
-                place_lats.append(name_list[1])
-                place_lons.append(name_list[2])
+                place_lats.append(float(name_list[1]))
+                place_lons.append(float(name_list[2]))
                 places.append(name[0]+", " + name[1])
                 tups = l[1].split(";")
+                print(tups)
                 size_clusters.append(len(tups))
                 for tup in tups:
+                    print(tup)
                     t = tup.split(",")
+                    print(t)
                     if len(t) == 3:
-                        lats_list.append(float(t[1]))
-                        lons_list.append(float(t[2]))
+                        print()
+                        lat = float(lonlat_dict[name_list[0][1:]][0])
+                        lon = float(lonlat_dict[name_list[0][1:]][1])
+                        x,y = my_map(lon,lat)
+                        my_map.plot(x,y,"ro",markersize=10)
+                        #lats_list.append(float(lonlat_dict[name_list[0][1:]][0]))
+                        #lons_list.append(float(lonlat_dict[name_list[0][1:]][1]))
 
-    plot_setup()
     counter = 0
     for i in range(len(places)):
         lons = lons_list[counter:counter+size_clusters[i]]
         lats = lats_list[counter:counter+size_clusters[i]]
+        print(lons,lats)
         counter += size_clusters[i]
         xi,yi = my_map(lons,lats)
+        print(lons,lats)
         my_map.plot(xi,yi,colors[i])
-    for label,x,y in zip(places,places_lats,places_lons):
-        xi,yi=my_map(x,y)
-        plt.text(xi+10000,yi+5000,label)
+    #for label,x,y in zip(places,place_lons,place_lats):
+    #    xi,yi=my_map(x,y)
+    #    plt.text(xi+10000,yi+5000,label)
     plt.title("Largest Homogenous Areas in the US")
     plt.savefig("Homogenous Areas")
 
 if __name__ == "__main__":
-    #plot_homogenous(sys.argv[1])
+    plot_homogenous(sys.argv[1],sys.argv[2],sys.argv[3])
     #print(sys.argv[1])
-    plot_json(sys.argv[1])
+    #plot_json(sys.argv[1])
     #plot_unique_avg(sys.argv[1],sys.argv[2])

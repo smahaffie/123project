@@ -32,10 +32,22 @@ class make_graph(mrj):
                 continue
             nname, nlon, nlat = n.split(',')
             points.append((nlon,nlat))
+        if len(points) > 2:
+            try:
+                hull = ConvexHull(points)
+                area  = hull.volume
+                yield cname, area
 
-        hull = ConvexHull(points)
-        area  = hull.volume
-        yield cname, area
+            except:
+                # dykstra failed for some reason, most likely because
+                # all points were in a line (unlikely, as we are dealing with floats)
+                global NUM_INCORRECT
+                NUM_INCORRECT += 1
+                pass
+
+        #hull = ConvexHull(points)
+        #area  = hull.volume
+        #yield cname, area
 
     def reducer_init(self):
         """
@@ -70,17 +82,5 @@ class make_graph(mrj):
 
 
 if __name__ == "__main__":
+    NUM_INCORRECT = 0
     make_graph.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
