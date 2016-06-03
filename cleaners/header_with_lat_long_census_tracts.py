@@ -4,7 +4,9 @@ import sys
 import json
 
 '''
-Parses the geo files to find the row indexes that correspond to census blocks for every state
+Parses the geo files to find the row indexes that correspond to census tracts for every state
+Generates csv files that are used by "correct_make_json_tracts" to create a master json
+necessary for all of the census-tract level analysis
 '''
 
 def find_lonlat( line):

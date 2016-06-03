@@ -1,6 +1,15 @@
 import json
 import csv
 
+'''
+Creates the master json we use for our analysis, containing row indexes, names,
+latitudes and longitudes
+
+Usage: python3 correct_make_json.py
+Requires all of the csv files generates by "haeder_with_lat_long.py" to be located
+in a single directory from which this file is run
+'''
+
 def create_json():
 	'''
 	Creates a json file which has containing the list of "places" for each state in the US

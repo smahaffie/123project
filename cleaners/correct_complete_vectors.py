@@ -232,7 +232,7 @@ class gen_vectors(mrj):
 
         place = list(place)
         p = ",".join(place) + ","
-        if all_zeros==False:
+        if all_zeros==False: #avoid yielding completely missing data
             yield p, to_yield
 
 

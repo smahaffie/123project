@@ -5,6 +5,12 @@ import json
 
 '''
 Parses the geo files for every state in order to determine what row indexes for each state correspond to census places in the US
+The csv files that are created are then used by "create_json.py" which creates a dictionary
+that stores the key information about every place that we need in order to complete the
+analysis
+
+Usage: just call the function from the command line. Requires that all of the geo
+header files are located in the directory from which the file is being called
 '''
 
 def find_lonlat( line):
@@ -36,8 +42,7 @@ def find_index_places(file,state):
 
 	list_codes = []
 	indexes = []
-	#state = file[:2]
-	#print(state)
+
 	with open(file) as f:
 		counter = 0
 		for line in f:
