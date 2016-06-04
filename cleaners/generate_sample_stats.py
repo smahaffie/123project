@@ -40,7 +40,7 @@ def create_summary_files(raw_file, data_file, avgs_file, stds_file):
             if not line[i+2] == "missing":
                 squared_deviations += (float(line[i+2])-mean) ** 2                
 
-        std = math.sqrt(squared_deviations/(len(data)-missing)
+        std = math.sqrt(squared_deviations/(len(data)-missing))
 
         stds.append("{0:.4f}".format(std))
 
@@ -60,7 +60,7 @@ def create_summary_files(raw_file, data_file, avgs_file, stds_file):
             i += 1
 
 if __name__ == "__main__":
-    create_summary_files(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+    create_summary_files(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
             
 
