@@ -18,8 +18,6 @@ class make_graph(mrj):
         self.add_file_option('--vectors')
         self.add_file_option('--neighbors')
 
-        #self.add_file_option('--epsilon')
-
     def difference(self,a,b):
         '''
         finds difference between two places

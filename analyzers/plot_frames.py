@@ -32,21 +32,6 @@ COLORS = [  u'darkolivegreen', u'darkseagreen', u'darkslategrey', u'dimgray',
 COLORDICT = dict(zip(States,COLORS))
 
 
-def prettify_state():
-    """
-    returns a dict {states:color code}
-    """
-    States = ["AK","AL","AZ","AR","CA","CO","CT","DE","FL",
-        "GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA",
-        "MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC",
-        "ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
-        "VA","WA","WV", "WI", "WY"]
-    colors = matplotlib.colors.cnames
-    chosen = np.random.choice(colors.keys(),len(States),False)
-
-    return dict(zip(States,chosen))
-
-
 def plot_setup():
     '''
     Basic set up for plots
@@ -103,22 +88,6 @@ def undo_mercator_project(x,y):
     lat = lat*360 /2/np.pi
     return lon, lat
 
-
-
-def plot_json2(file1,num_frame):
-    mymap = plot_setup()
-    framedict = json.load(open(file1,'r'))
-    for state, statecolor in COLORDICT.items():
-        stateframe = [points for name, points in framedict.items() if name[-2:]==state]
-        lons = [lon for lon,lat,_,__ in stateframe]
-        lats = [lon for lon,lat,_,__ in stateframe]
-        xs,ys = mymap(lons,lats)
-        print(len)
-        mymap.plot(xs,ys,color=statecolor,label="vectors")
-    plt.show()
-
-
-
 def plot_json(file1,num_frame):
     '''
     Plots latitude and longitudes stored in a json direction
@@ -146,34 +115,6 @@ def plot_json(file1,num_frame):
         row = [key, lat, lon]
         rows.append(row)
     plot_vectors(rows,my_map)
-
-    '''lons_list.append(lon)
-        lats_list.append(lat)
-        state = key[-2:]
-        #x,y = my_map(lon,lat)
-
-
-        #lon,lat = undo_mercator_project(x,y)
-        #print(key,lon,lat)
-
-        if state in color_dict:
-            color = color_dict[state]
-        else:
-            color_dict[state] = colors[counter]
-            color = colors[counter]
-            if counter < 15:
-                counter += 1
-            else:
-                counter = 0
-        x,y =my_map(lon,lat)
-        my_map.plot(x,y)
-        #print(lon,lat)
-        #my_map.plot(lon,lat,"ro",markersize=10,latlon=True)
-    #x,y = my_map(lons_list,lats_list)
-    #my_map.plot(x[:200],y[:200],color,markersize=20)
-    #print(len(x),len(y))
-    #for i in range(200):
-    #    my_map.plot(y[i],x[i],color,markersize=20)'''
     plt.savefig(str(num_frame))
     plt.close()
 
@@ -190,25 +131,9 @@ def plot_vectors(vectors,my_map,label="vectors"):
     '''
     
     colors = "bgrcmykwbgrcmykw"
-
     places = []
-    
     size_clusters = []
     counter = 0
-
-    '''
-    with open(vectors) as f:
-        for line in f:
-            line = line.split("\t")
-            place = line[0]
-            name_list = place.split(",")
-            if len(name_list) > 2:
-                name = name_list[0]
-                name = name.replace("city","")
-                name = name.replace("CDP","")
-                name = name.split("_")
-                #print(name_list)'''
-    #color_dict = prettify_state()
     for s in States:
         lons_list,lats_list = [],[]
         for name,lon,lat in vectors:
@@ -217,11 +142,6 @@ def plot_vectors(vectors,my_map,label="vectors"):
                 lons_list.append(lat)
         x,y = my_map(lons_list,lats_list)
         my_map.plot(x,y,color=COLORDICT[s],marker='.',markersize=20,linestyle='',label=label)
-
-    '''
-    for label,x,y in zip(places,lons_list,lats_list):
-        xi,yi=my_map(x,y)
-        plt.text(xi+10000,yi+10000,label[1:])'''
 
 def plot_homogenous(vectors):
     '''
@@ -279,7 +199,3 @@ if __name__ == "__main__":
     for a,b in zip(f,o):
         plot_json(a,b)
     os.system("cd out; ffmpeg -i %02d.png output.gif")
-
-
-
-    #plot_unique_avg(sys.argv[1],sys.argv[2])
