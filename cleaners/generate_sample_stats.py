@@ -24,20 +24,23 @@ def create_summary_files(raw_file, data_file, avgs_file, stds_file):
     stds = []
     for i in range(len(variables)-2):
         tot = 0
+        missing = 0
         for line in data:
 
             if not line[i+2] == "missing":
                 tot += float(line[i+2])
+            else: 
+                missing += 1
 
-        mean = tot/len(data)
+        mean = tot/(len(data)-missing)
         means.append("{0:.4f}".format(mean))
 
         squared_deviations = 0
         for line in data:
             if not line[i+2] == "missing":
-                squared_deviations += (float(line[i+2])-mean) ** 2
+                squared_deviations += (float(line[i+2])-mean) ** 2                
 
-        std = math.sqrt(squared_deviations/len(data))
+        std = math.sqrt(squared_deviations/(len(data)-missing)
 
         stds.append("{0:.4f}".format(std))
 
