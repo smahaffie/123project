@@ -7,6 +7,7 @@ from math import radians, cos, sin, asin, sqrt
 '''
 Calculate average demographic distance between two places that are within a certain number of miles
 of each other
+We use this data point as a parameter in the springs simulation
 Inputs: tab delimited file of pairs where each item in a pair is the name of a
 place AND json file of vectors with all of the vector data in a list
 '''
