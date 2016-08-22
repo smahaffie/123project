@@ -5,3 +5,5 @@ Where are the largest homogeneous areas in the US?
 Where are places most similar and dissimilar from their neighbors, and how can we visualize these dynamics?
 
 This task led us to a big data challenge involved data from the 2000 U.S. Census.
+
+To see the final product produced by this project, view the pdf titled "what_is_normal_cs123.pdf."
